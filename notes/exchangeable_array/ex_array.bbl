@@ -1,0 +1,93 @@
+\begin{thebibliography}{}
+
+\bibitem[Aldous, 1981]{aldous1981representations}
+Aldous, D.~J. (1981).
+\newblock Representations for partially exchangeable arrays of random
+  variables.
+\newblock {\em Journal of Multivariate Analysis}, 11(4):581--598.
+
+\bibitem[Cai et~al., 2015]{Cai2015}
+Cai, D., Ackerman, N., and Freer, C. (2015).
+\newblock {Priors on exchangeable directed graphs}.
+\newblock pages 1--17.
+
+\bibitem[Caron, 2012]{Caron2012}
+Caron, F. (2012).
+\newblock {Bayesian nonparametric models for bipartite graphs}.
+\newblock {\em Advances in Neural Information Processing Systems 25
+  (Proceedings of NIPS)}, pages 1--9.
+
+\bibitem[Caron and Fox, 2015]{Caron2015}
+Caron, F. and Fox, E.~B. (2015).
+\newblock {Sparse graphs using exchangeable random measures}.
+\newblock pages 1--64.
+
+\bibitem[Ferguson and Klass, 1972]{ferguson1972representation}
+Ferguson, T.~S. and Klass, M.~J. (1972).
+\newblock A representation of independent increment processes without gaussian
+  components.
+\newblock {\em The Annals of Mathematical Statistics}, 43(5):1634--1643.
+
+\bibitem[Gu et~al., 2015]{gu2015traversing}
+Gu, K., Miller, J., and Liang, P. (2015).
+\newblock Traversing knowledge graphs in vector space.
+\newblock In {\em EMNLP}.
+
+\bibitem[Herlau, 2015]{Herlau2015}
+Herlau, T. (2015).
+\newblock {Completely random measures for modelling block-structured networks}.
+\newblock (1):1--15.
+
+\bibitem[Hoover, 1979]{hoover1979relations}
+Hoover, D.~N. (1979).
+\newblock Relations on probability spaces and arrays of random variables.
+\newblock {\em Preprint, Institute for Advanced Study, Princeton, NJ}, 2.
+
+\bibitem[Kallenberg, 1990]{Kallenberg1990}
+Kallenberg, O. (1990).
+\newblock {Exchangeable random measures in the plane}.
+\newblock {\em Journal of Theoretical Probability}.
+
+\bibitem[Kallenberg, 2005]{kallenberg2005probabilistic}
+Kallenberg, O. (2005).
+\newblock {\em Probabilistic symmetries and invariance principles}.
+\newblock Springer Science \& Business Media.
+
+\bibitem[Lloyd et~al., 2013]{Lloyd2013}
+Lloyd, J., Orbanz, P., Ghahramani, Z., and Roy, D. (2013).
+\newblock {Random function priors for exchangeable arrays with applications to
+  graphs and relational data}.
+\newblock In {\em Advances in Neural Information Processing Systems 26}, pages
+  1--9.
+
+\bibitem[Orbanz and Roy, 2015]{Orbanz2015}
+Orbanz, P. and Roy, D.~M. (2015).
+\newblock {Bayesian Models of Graphs, Arrays and Other Exchangeable Random
+  Structures}.
+\newblock {\em TPAMI}, pages 1--25.
+
+\bibitem[Salakhutdinov and Mnih, 2008]{Salakhutdinov2008}
+Salakhutdinov, R. and Mnih, A. (2008).
+\newblock {Bayesian probabilistic matrix factorization using Markov chain Monte
+  Carlo.}
+\newblock In {\em Proceedings of the 25th International Conference on Machine
+  Learning (2008)}, volume~25, pages 880--887.
+
+\bibitem[Sethuraman, 1994]{sethuraman1994constructive}
+Sethuraman, J. (1994).
+\newblock A constructive definition of dirichlet priors.
+\newblock {\em Statistica sinica}, pages 639--650.
+
+\bibitem[Todeschini and Caron, 2016]{Todeschini2016}
+Todeschini, A. and Caron, F. (2016).
+\newblock {Exchangeable Random Measures for Sparse and Modular Graphs with
+  Overlapping Communities}.
+\newblock (2014).
+
+\bibitem[Veitch and Roy, 2015]{Veitch2015}
+Veitch, V. and Roy, D.~M. (2015).
+\newblock {The Class of Random Graphs Arising from Exchangeable Random
+  Measures}.
+\newblock {\em arXiv.org}, math.ST.
+
+\end{thebibliography}
