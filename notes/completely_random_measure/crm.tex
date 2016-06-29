@@ -1,0 +1,87 @@
+% !TEX TS-program = pdflatexmk
+\documentclass{article}
+
+\usepackage{graphicx}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage[a4paper, total={6in, 8in}]{geometry}
+\usepackage{amsthm}
+\usepackage{natbib}
+
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+
+\title{Completely Random Measure}
+\date{\today}
+\author{Dongwoo Kim\\ANU}
+
+\begin{document}
+
+\maketitle
+
+\section{Poisson Process}
+\label{sec:pp}
+Let $(S, \mathcal{S})$ be a measurable space and $\Pi$ be a random countable collection of points on $S$. Let  counting process $N(A) = |\Pi \cap A|$ for any measurable set $A$. $\Pi$ is a Poisson process if $N(A)$ and $N(B)$ are independent for every measurable disjoint sets $A$ and $B$ and $N(A)$ is Poisson distributed with mean $\mu(A)$ for a $\sigma$-finite measure $\mu$ (also called mean measure).
+
+Let $f$ be a measurable function from $S$ to $\mathbb{R}$, then by the Campbell's theorem $\sum_{x\in Pi} f(x)$ is absolutely convergent with probability if and only if
+\begin{align}
+\int_{S} \min(|f(x), 1|)\mu(dx) < \infty.
+\end{align}
+The Laplace functional of Poisson process for any $f \ge 0$ is
+\begin{align}
+\mathbb{E}_{\Pi}[e^{-\sum_{x \in \Pi}f(x)}] = \exp \Bigg\{ - \int_{S} (1-e^{-f(x)})\mu(dx) \Bigg\}
+\end{align}
+
+\section{Completely Random Measure}
+Let $(\Omega, \mathcal{F}, \mathbb{P})$ be some probability space, $(M(S), \mathcal{B})$ be the space of all $\sigma$-finite measures on $(S, \mathcal{S})$. A completely random measure (CRM) $\Lambda$ on $(S, \mathcal{S})$ is a measurable function from $\Omega$ to $M(S)$ \footnote{So one can define a probability over a set random measures $\mathbb{P}(\Lambda^{-1}(A)), A \in \mathcal{B}$} such that
+\begin{enumerate}
+\item $\mathbb{P}(\Lambda(\emptyset) = 0)$
+\item For any disjoint countable collection of sets $A_i$, the random variable $\Lambda(A_i)$ are independent, and $\Lambda(\cup A_i) = \sum_i \Lambda(A_i)$ a.s. (also known as independent increments)
+\end{enumerate}
+CRMs with random masses at random locations can be represented as $\Lambda = \sum_{i=1}^{\infty} w_i \delta_{x_i}$ where $x_i$ is a location and $w_i$ is a mass on that location.
+
+\subsection{Completely Random Measure and Poisson Process}
+The most important characteristic of CRM is its relation to the Poisson process. For any CRM $\Lambda$ on $(S, \mathcal{S})$ without any deterministic component, there is a corresponding Poisson Process $\Pi$ on $(\mathbb{R}_+ \times S, \mathcal{B}_{\mathbb{R}_+} \times \mathcal{S})$\footnote{Unlike Section \ref{sec:pp}, now the Poisson process is on the product space where each point corresponds to a pair $(w, x)$} such that
+\begin{align}
+\Lambda(A) = \sum_{(w, x) \in \Pi}w \mathbf{1}_{[x \in A]} = \int_{\mathbf{R}\times A} w \Pi(dw, dx).
+\end{align}
+Let $\nu(dw, dx)$ be a mean measure of Poisson Process $\Pi$, From the Campbell's theorem, one can easily derive the Laplace transform of $\Lambda(A)$ in $t\ge 0$ for a measurable set $A$:
+\begin{align}
+\mathbb{E}_\Lambda[e^{-t\Lambda(A)}] &= \mathbb{E}_{\Pi}[e^{-t \int_{\mathbf{R}\times A} w \Pi(dw, dx) }] \\
+& = \exp\Bigg( - \int_{\mathbb{R}_+ \times A} (1- e^{-tw}) \nu(dw,dx) \Bigg),
+\end{align}
+which is derived from Laplace functional of Poison process where $f(w, x) = tw$.
+If the mean measure $\nu(dw, dx) = \rho(dw)H_0(dx)$ where $\rho$ and $H_0$ is both $\sigma$-finite measures, then $\Lambda$ is known as homogeneous CRM, or if $\nu(dw, dx) = \rho(dw|dx)H_0(dx)$ then this is non-homogeneous CRM which implies that the masses $(w_i)$ of atoms in $\Lambda$ are dependent on the locations. In homogeneous case, the masses are independent of the locations and are distributed according to a Poisson process over $\mathbb{R}_+$ with mean intensity $\rho$, while the locations are i.i.d. from $H_0$. In practice, $H_0$ is usually referred as a base distribution which is some parametric probability density on $S$ (e.g. Gaussian distribution on $\mathbb{R}$).
+
+By using some known properties about Poisson process, we can also deduce some known properties of CRM. For example, the expected number of points on $\mathbb{R}_+ \times S$ is computed as
+\begin{align}
+\mathbb{E}_\Pi[\Pi(\mathbb{R}_+ \times S)] = \int_{\mathbb{R}_+ \times S} \nu(dw,dx).
+\end{align}
+Sometimes (in most of the useful cases), the expected number of points might be diverge (i.e. $\Pi(\mathbb{R}_+ \times S) = \infty$), however, even in this case the total mass of CRM $\Lambda(S)$ could be positive and finite with probability one if the following condition is satisfied\footnote{This condition is from the Laplace transform of $\lambda(S)$ where $t=1$ so that the exponent of Laplace transform does not diverge.}:
+\begin{align}
+\int_{\mathbb{R}_+ \times A} (1- e^{-w}) \rho(dw)H_0(S) < \infty.
+\end{align}
+If the above two conditions are satisfied, then $\Lambda$ has an infinite number of atoms (again, which corresponds to the expected number of points). This property is also important to construct a normalised random measure (NRM); since the total mass of CRM is positive and finite almost surely, one can construct a NRM through the normalisation of CRM.
+
+\section{Special Case}
+Based on the choice of intensity on weights $\rho(dw)$, CRM shows different characteristics. 
+
+\subsection{Generalised Gamma Process}
+
+\begin{align}
+\rho_{\alpha, \sigma, \tau}(dw) = \frac{\alpha}{\Gamma(1-\sigma)}w^{-\sigma - 1}e^{-\tau w} dw
+\end{align}
+
+\textbf{Sum of weights from GGP}:
+\begin{align}
+\int_{\mathbb{R}_+} (1- e^{-tw}) \rho_{\alpha, \sigma, \tau}(dw) = \exp\bigg\{-\frac{\alpha}{\sigma}\big((t+\tau)^\sigma - \tau^\sigma\big)\bigg\}
+\end{align}
+
+\subsection{Beta Process}
+
+
+\bibliographystyle{apalike}
+\bibliography{ref}
+
+\end{document}
