@@ -24,17 +24,17 @@
 \label{sec:pp}
 Let $(S, \mathcal{S})$ be a measurable space and $\Pi$ be a random countable collection of points on $S$. Let  counting process $N(A) = |\Pi \cap A|$ for any measurable set $A$. $\Pi$ is a Poisson process if $N(A)$ and $N(B)$ are independent for every measurable disjoint sets $A$ and $B$ and $N(A)$ is Poisson distributed with mean $\mu(A)$ for a $\sigma$-finite measure $\mu$ (also called mean measure).
 
-Let $f$ be a measurable function from $S$ to $\mathbb{R}$, then by the Campbell's theorem $\sum_{x\in Pi} f(x)$ is absolutely convergent with probability if and only if
+Let $f$ be a measurable function from $S$ to $\mathbb{R}$, then by the Campbell's theorem $\sum_{x\in \Pi} f(x)$ is absolutely convergent with probability one if and only if
 \begin{align}
 \int_{S} \min(|f(x), 1|)\mu(dx) < \infty.
 \end{align}
-The Laplace functional of Poisson process for any $f \ge 0$ is
+The Laplace functional of Poisson process for any $f \ge 0$ is then
 \begin{align}
-\mathbb{E}_{\Pi}[e^{-\sum_{x \in \Pi}f(x)}] = \exp \Bigg\{ - \int_{S} (1-e^{-f(x)})\mu(dx) \Bigg\}
+\mathbb{E}_{\Pi}[e^{-\sum_{x \in \Pi}f(x)}] = \exp \Bigg\{ - \int_{S} (1-e^{-f(x)})\mu(dx) \Bigg\}.
 \end{align}
 
 \section{Completely Random Measure}
-Let $(\Omega, \mathcal{F}, \mathbb{P})$ be some probability space, $(M(S), \mathcal{B})$ be the space of all $\sigma$-finite measures on $(S, \mathcal{S})$. A completely random measure (CRM) $\Lambda$ on $(S, \mathcal{S})$ is a measurable function from $\Omega$ to $M(S)$ \footnote{So one can define a probability over a set random measures $\mathbb{P}(\Lambda^{-1}(A)), A \in \mathcal{B}$} such that
+Let $(\Omega, \mathcal{F}, \mathbb{P})$ be some probability space, $(M(S), \mathcal{B})$ be the space of all $\sigma$-finite measures on $(S, \mathcal{S})$. A completely random measure (CRM) $\Lambda$ on $(S, \mathcal{S})$ is a measurable function from $\Omega$ to $M(S)$ \footnote{This corresponds to a measure-theoretic definition of a random variable. So one can define a probability over a set random measures $\mathbb{P}(\Lambda^{-1}(A))$ where $A \in \mathcal{B}$. However, in the rest of the paper, we use $\Lambda(A)$ as a measure on $S$ where $A \in \mathcal{S}$.} such that
 \begin{enumerate}
 \item $\mathbb{P}(\Lambda(\emptyset) = 0)$
 \item For any disjoint countable collection of sets $A_i$, the random variable $\Lambda(A_i)$ are independent, and $\Lambda(\cup A_i) = \sum_i \Lambda(A_i)$ a.s. (also known as independent increments)
@@ -58,20 +58,33 @@ By using some known properties about Poisson process, we can also deduce some kn
 \begin{align}
 \mathbb{E}_\Pi[\Pi(\mathbb{R}_+ \times S)] = \int_{\mathbb{R}_+ \times S} \nu(dw,dx).
 \end{align}
-Sometimes (in most of the useful cases), the expected number of points might be diverge (i.e. $\Pi(\mathbb{R}_+ \times S) = \infty$), however, even in this case the total mass of CRM $\Lambda(S)$ could be positive and finite with probability one if the following condition is satisfied\footnote{This condition is from the Laplace transform of $\lambda(S)$ where $t=1$ so that the exponent of Laplace transform does not diverge.}:
+Sometimes (in most of the useful cases), the expected number of points might be diverge (i.e. $\mathbb{E}[\Pi(\mathbb{R}_+ \times S)] = \infty$, a.s.), however, even in this case the total mass of CRM $\Lambda(S)$ could be positive and finite with probability one if the following condition is satisfied\footnote{This condition is from the Laplace transform of $\lambda(S)$ where $t=1$ so that the exponent of Laplace transform does not diverge.}:
 \begin{align}
 \int_{\mathbb{R}_+ \times A} (1- e^{-w}) \rho(dw)H_0(S) < \infty.
 \end{align}
 If the above two conditions are satisfied, then $\Lambda$ has an infinite number of atoms (again, which corresponds to the expected number of points). This property is also important to construct a normalised random measure (NRM); since the total mass of CRM is positive and finite almost surely, one can construct a NRM through the normalisation of CRM.
 
 \section{Special Case}
-Based on the choice of intensity on weights $\rho(dw)$, CRM shows different characteristics. 
+CRM shows different characteristics based on the choice of intensity on weights $\rho(dw)$. 
 
 \subsection{Generalised Gamma Process}
 
 \begin{align}
 \rho_{\alpha, \sigma, \tau}(dw) = \frac{\alpha}{\Gamma(1-\sigma)}w^{-\sigma - 1}e^{-\tau w} dw
 \end{align}
+GGP encompasses several well-known processes based on the different configuration on parameter $\sigma$ and $\tau$. 
+\begin{itemize}
+\item Finite activity
+\begin{itemize}
+\item $(\sigma \le 0, \tau > 0)$: weights $w_i$ are i.i.d. from Gamma($-\sigma$,$\tau$).
+\end{itemize}
+\item Infinite activity
+\begin{itemize}
+\item $(\sigma = 0, \tau > 0)$: the Gamma process.
+\item $(\sigma = \frac{1}{2}, \tau > 0)$: the inverse-Gaussian process.
+\item $(\sigma \in (0, 1), \tau = 0)$: the stable process 
+\end{itemize}
+\end{itemize}
 
 \textbf{Sum of weights from GGP}:
 \begin{align}
