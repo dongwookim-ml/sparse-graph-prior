@@ -36,9 +36,16 @@ def GGPrnd(alpha, sigma, tau, T=0):
     Reference:
     S. Favaro and Y.W. Teh. MCMC for normalized random measure mixture
         models. Statistical Science, vol.28(3), pp.335-359, 2013.
+    :param alpha: positive scalar
+    :param sigma: real in (-Inf, 1)
+    :param tau: positive scalar
+    :param T: truncation threshold; positive scalar
+    :return:
+    :param N: poins of the GGP
+    :param T: threshold
     """
 
-    # finite activity GGP
+    # finite activity GGP, don't need to truncate
     if sigma < 0:
         rate = np.exp(np.log(alpha) - np.log(-sigma) + sigma + np.log(tau))
         K = np.random.poisson(rate)
