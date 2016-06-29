@@ -22,7 +22,7 @@ setup(
     long_description=long_description,
 
     # The project's main homepage.
-    url='https://github.com/arongdari/almc/',
+    url='https://github.com/arongdari/sparse-graph-prior/',
 
     # Author details
     author='Dongwoo Kim',
