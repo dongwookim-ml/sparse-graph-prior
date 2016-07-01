@@ -157,6 +157,8 @@ def etstablernd(V0, alpha, tau, n=1):
 
             if X >= 0 and cond <= E:
                 break
+
+        # same as V0 ** (1/alpha) * X ** (-b), for numerical stability i guess.
         samples[i] = np.exp(1. / alpha * np.log(V0) - b * np.log(X))
 
     return samples

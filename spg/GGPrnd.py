@@ -41,8 +41,8 @@ def GGPrnd(alpha, sigma, tau, T=0):
     :param tau: positive scalar
     :param T: truncation threshold; positive scalar
     :return:
-    :param N: poins of the GGP
-    :param T: threshold
+        N: weights from the GGP
+        T: threshold
     """
 
     # finite activity GGP, don't need to truncate
