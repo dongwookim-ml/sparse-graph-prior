@@ -122,7 +122,21 @@ Using this urn representation, we can rewrite the generative process as
 \item $D_{\alpha\beta} = \sum_{d=1}^{D_{\alpha\beta}^*} \delta_{(\theta_{di}, \theta_{dj}, \theta_{dk})}$,
 \end{enumerate}
 
-\subsection{Sparsity}
+\subsection{Characteristics of Random Graph}
+Unlike the two-dimensional space case, graph prior on three dimensional space may have various definition of the sparsity of the graph. Since our focus here is the growth rate of various statistics as the graph restriction $\alpha$ and $\beta$ increase. We list some statistics to characterise the random graph.
+
+To compute the (expected) growth rate of the number of triples with respect to the number of entities and relations, we first identify the growth rate of the number of triples, entities, and relations with respect to the varying graph restriction $\alpha$ and $\beta$. Let $N^{e}_{\alpha\beta}$ be the number of triples given $\alpha$ and $\beta$, $N_{\alpha}$ be the number of entities given $\alpha$, and $N_{\beta}$ be the number of relations given $\beta$. Here are some statistics that might help to shape these characteristics.
+
+\begin{align}
+\frac{E[N^e_{\alpha\beta}]}{E[N_\alpha N_\beta]} &\text{ as }\alpha \rightarrow \infty, \beta \rightarrow \infty \\
+\frac{E[N_\alpha|\beta]}{\alpha} &\text{ as } \alpha \rightarrow \infty \\
+\frac{E[N_\alpha]}{\alpha} &\text{ as } \alpha \rightarrow \infty \\
+\frac{E[N_\beta|\alpha]}{\beta} &\text{ as } \beta \rightarrow \infty \\
+\frac{E[N_\beta]}{\beta} &\text{ as } \beta \rightarrow \infty \\
+\frac{E[N^e_{\alpha\beta}]}{\alpha\beta} &\text{ as }\alpha \rightarrow \infty, \beta \rightarrow \infty \\
+\frac{E[N^e_{\alpha}|\beta]}{\alpha} &\text{ as }\alpha \rightarrow \infty
+\end{align}
+
 
 \begin{theorem} \label{thm:edge} Consider the point process $\bar{Z}$ with infinite-activity intensity measures $\rho(dw)$ and $\rho'(dw')$. Given $\mu'$ from $\rho'(dw')$, the number of edges in $\bar{Z}_{\alpha}$ grows quadratically as $\alpha \rightarrow \infty$ almost surely.
 \end{theorem}
