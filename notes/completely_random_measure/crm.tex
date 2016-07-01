@@ -24,7 +24,7 @@
 \label{sec:pp}
 Let $(S, \mathcal{S})$ be a measurable space and $\Pi$ be a random countable collection of points on $S$. Let  counting process $N(A) = |\Pi \cap A|$ for any measurable set $A$. $\Pi$ is a Poisson process if $N(A)$ and $N(B)$ are independent for every measurable disjoint sets $A$ and $B$ and $N(A)$ is Poisson distributed with mean $\mu(A)$ for a $\sigma$-finite measure $\mu$ (also called mean measure).
 
-Let $f$ be a measurable function from $S$ to $\mathbb{R}$, then by the Campbell's theorem $\sum_{x\in \Pi} f(x)$ is absolutely convergent with probability one if and only if
+Let $f$ be a measurable function from $S$ to $\mathbb{R}$, then by the Campbell's theorem \citep{kingman1993poisson} $\sum_{x\in \Pi} f(x)$ is absolutely convergent with probability one if and only if
 \begin{align}
 \int_{S} \min(|f(x), 1|)\mu(dx) < \infty.
 \end{align}
@@ -68,30 +68,34 @@ If the above two conditions are satisfied, then $\Lambda$ has an infinite number
 CRM shows different characteristics based on the choice of intensity on weights $\rho(dw)$. 
 
 \subsection{Generalised Gamma Process}
-
+The L\'{e}vy intensity measure $\rho$ of the generalised Gamma process (GGP) is
 \begin{align}
 \rho_{\alpha, \sigma, \tau}(dw) = \frac{\alpha}{\Gamma(1-\sigma)}w^{-\sigma - 1}e^{-\tau w} dw
 \end{align}
-GGP encompasses several well-known processes based on the different configuration on parameter $\sigma$ and $\tau$. 
+GGP encompasses several well-known processes based on the different configuration on parameter $\sigma$ and $\tau$: 
 \begin{itemize}
-\item Finite activity
+\item Finite activity case: $\int_w \rho_{\alpha, \sigma, \tau}(dw) < \infty$
 \begin{itemize}
 \item $(\sigma \le 0, \tau > 0)$: weights $w_i$ are i.i.d. from Gamma($-\sigma$,$\tau$).
 \end{itemize}
-\item Infinite activity
+\item Infinite activity case : $\int_w \rho_{\alpha, \sigma, \tau}(dw) = \infty$
 \begin{itemize}
-\item $(\sigma = 0, \tau > 0)$: the Gamma process.
+\item $(\sigma = 0, \tau > 0)$: the Gamma process. Normalised Gamma process = Dirichlet process.
 \item $(\sigma = \frac{1}{2}, \tau > 0)$: the inverse-Gaussian process.
 \item $(\sigma \in (0, 1), \tau = 0)$: the stable process 
 \end{itemize}
 \end{itemize}
 
-\textbf{Sum of weights from GGP}:
+\textbf{Sum of weights from GGP}: As we saw in the previous section, for some intensity measure, the total mass $\Lambda(S)$ is finite a.s. If we consider $\Lambda(S)$ as a random variable, then the Laplace transform of the variable is
 \begin{align}
-\int_{\mathbb{R}_+} (1- e^{-tw}) \rho_{\alpha, \sigma, \tau}(dw) = \exp\bigg\{-\frac{\alpha}{\sigma}\big((t+\tau)^\sigma - \tau^\sigma\big)\bigg\}
+\mathbb{E}(e^{-t\Lambda(S)}) = \int_{\mathbb{R}_+} (1- e^{-tw}) \rho_{\alpha, \sigma, \tau}(dw) = \exp\bigg\{-\frac{\alpha}{\sigma}\big((t+\tau)^\sigma - \tau^\sigma\big)\bigg\},
 \end{align}
+which corresponds to the Laplace transform of the exponentially tilted stable distribution where the exact sampler exists \citep{devroye2009random,hofert2011sampling}.
 
 \subsection{Beta Process}
+\begin{align}
+\nu(dw, dx) = \alpha w^{-1}(1-w)^{\alpha-1} dw H_0(dx)
+\end{align}
 
 
 \bibliographystyle{apalike}
