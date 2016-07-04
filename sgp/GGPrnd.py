@@ -101,6 +101,6 @@ def GGPrnd(alpha, sigma, tau, T=0):
         if count > 10e8:
             # If too many computation, we lower the threshold T and rerun
             T /= 10.
-            N = GGPrnd(alpha, sigma, tau, T)
+            N, T = GGPrnd(alpha, sigma, tau, T)
 
     return N, T

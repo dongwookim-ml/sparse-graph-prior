@@ -32,7 +32,7 @@ def GGPgraphrnd(alpha, sigma, tau, T=0):
         hyper_tau = tau
         tau = np.random.gamma(hyper_tau[0], 1./hyper_tau[1])
 
-    w, _ = GGPrnd(alpha, sigma, tau, T)
+    w, T = GGPrnd(alpha, sigma, tau, T)
 
     if len(w) == 0:
         raise Exception("GGP has no atom %.2f %.2f %.2f" % (alpha, sigma, tau))
