@@ -93,6 +93,8 @@ def GGPrnd(alpha, sigma, tau, T=0):
 
         if tau == 0 or np.log(np.random.random()) < (-1. - sigma) * np.log(t_new / t):
             # if tau>0, adaptive thinning - otherwise accept always
+            if k > len(N):
+                N = np.append(N, np.zeros(Njumps))
             N[k] = t_new
             k += 1
 
