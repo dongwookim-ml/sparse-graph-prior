@@ -5,6 +5,7 @@ from scipy.sparse import csc_matrix
 from .GGPrnd import GGPrnd
 from .GGPgraphrnd import GGPgraphrnd
 
+
 def BSgraphrnd(alpha, sigma, tau, K, eta, beta_0, T=0):
     """
     generate a block-structred sparse graph
@@ -64,6 +65,7 @@ def BSgraphrnd(alpha, sigma, tau, K, eta, beta_0, T=0):
         cumsum_groups[k] = np.cumsum(w_tmp)
         w_stars[k] = cumsum_groups[k, -1]
 
+    i_count = np.zeros((K, K))
     for k1, k2 in itertools.product(range(K), repeat=2):
         d_star = np.random.poisson(eta[k1, k2] * w_stars[k1] * w_stars[k2])
 
@@ -76,6 +78,7 @@ def BSgraphrnd(alpha, sigma, tau, K, eta, beta_0, T=0):
         col_idx = np.append(col_idx, idx2)
         active_nodes_idx = np.union1d(active_nodes_idx, idx1)
         active_nodes_idx = np.union1d(active_nodes_idx, idx2)
+        i_count[k1, k2] = d_star
 
     if len(row_idx) == 0:
         raise Exception("No edge in graph")
@@ -84,9 +87,9 @@ def BSgraphrnd(alpha, sigma, tau, K, eta, beta_0, T=0):
     w = w[active_nodes_idx]
     group = group[active_nodes_idx]
     _, new_idx = np.unique(np.append(row_idx, col_idx), return_inverse=True)
-    new_idx = np.reshape(new_idx, (len(row_idx), 2)).T
+    new_idx = np.reshape(new_idx, (2, len(row_idx)))
 
     g_size = len(active_nodes_idx)
     D = csc_matrix((np.ones(len(row_idx)), (new_idx[0], new_idx[1])), shape=(g_size, g_size))  # directed multigraph
 
-    return D, w, w_rem, alpha, sigma, tau, eta, group
+    return D, w, w_rem, alpha, sigma, tau, eta, group, i_count

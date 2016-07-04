@@ -22,7 +22,7 @@ def inv_W(t, x, alpha, sigma, tau):
 
 def GGPrnd(alpha, sigma, tau, T=0):
     """
-    GGPrnd samples poins of a generalised gamma process
+    GGPrnd samples points of a generalised gamma process
 
     Samples the points of the GGP with Levy measure
       alpha/Gamma(1-sigma) * w^(-1-sigma) * exp(-tau*w)
