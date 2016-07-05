@@ -88,7 +88,7 @@ GGP encompasses several well-known processes based on the different configuratio
 
 \textbf{Sum of weights from GGP}: As we saw in the previous section, for some intensity measure, the total mass $\Lambda(S)$ is finite a.s. If we consider $\Lambda(S)$ as a random variable, then the Laplace transform of the variable is
 \begin{align}
-\mathbb{E}(e^{-t\Lambda(S)}) = \int_{\mathbb{R}_+} (1- e^{-tw}) \rho_{\alpha, \sigma, \tau}(dw) = \exp\bigg\{-\frac{\alpha}{\sigma}\big((t+\tau)^\sigma - \tau^\sigma\big)\bigg\},
+\mathbb{E}[e^{-t\Lambda(S)}] = \exp\bigg\{-\int_{\mathbb{R}_+} (1- e^{-tw}) \rho_{\alpha, \sigma, \tau}(dw) \bigg\} = \exp\bigg\{-\frac{\alpha}{\sigma}\big((t+\tau)^\sigma - \tau^\sigma\big)\bigg\},
 \end{align}
 which corresponds to the Laplace transform of the exponentially tilted stable distribution where the exact sampler exists \citep{devroye2009random,hofert2011sampling}.
 
