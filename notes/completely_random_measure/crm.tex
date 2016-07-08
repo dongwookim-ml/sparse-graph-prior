@@ -52,7 +52,7 @@ Let $\nu(dw, dx)$ be a mean measure of Poisson Process $\Pi$, From the Campbell'
 & = \exp\Bigg( - \int_{\mathbb{R}_+ \times A} (1- e^{-tw}) \nu(dw,dx) \Bigg),
 \end{align}
 which is derived from Laplace functional of Poison process where $f(w, x) = tw$.
-If the mean measure $\nu(dw, dx) = \rho(dw)H_0(dx)$ where $\rho$ and $H_0$ is both $\sigma$-finite measures, then $\Lambda$ is known as homogeneous CRM, or if $\nu(dw, dx) = \rho(dw|dx)H_0(dx)$ then this is non-homogeneous CRM which implies that the masses $(w_i)$ of atoms in $\Lambda$ are dependent on the locations. In homogeneous case, the masses are independent of the locations and are distributed according to a Poisson process over $\mathbb{R}_+$ with mean intensity $\rho$, while the locations are i.i.d. from $H_0$. In practice, $H_0$ is usually referred as a base distribution which is some parametric probability density on $S$ (e.g. Gaussian distribution on $\mathbb{R}$).
+If the mean measure $\nu(dw, dx) = \rho(dw)H_0(dx)$ where $\rho$ and $H_0$ is both $\sigma$-finite measures, then $\Lambda$ is known as homogeneous CRM, or if $\nu(dw, dx) = \rho(dw|dx)H_0(dx)$ then this is non-homogeneous CRM which implies that the masses $(w_i)$ of atoms in $\Lambda$ are dependent on the locations. In homogeneous case, the masses are independent of the locations and are distributed according to a Poisson process over $\mathbb{R}_+$ with mean intensity $\rho$, while the locations are i.i.d. from $H_0$. In practice, $H_0$ is usually referred as a base distribution (or base measure) which has some parametric probability density on $S$ (e.g. Gaussian distribution on $\mathbb{R}$).
 
 By using some known properties about Poisson process, we can also deduce some known properties of CRM. For example, the expected number of points on $\mathbb{R}_+ \times S$ is computed as
 \begin{align}
@@ -90,12 +90,22 @@ GGP encompasses several well-known processes based on the different configuratio
 \begin{align}
 \mathbb{E}[e^{-t\Lambda(S)}] = \exp\bigg\{-\int_{\mathbb{R}_+} (1- e^{-tw}) \rho_{\alpha, \sigma, \tau}(dw) \bigg\} = \exp\bigg\{-\frac{\alpha}{\sigma}\big((t+\tau)^\sigma - \tau^\sigma\big)\bigg\},
 \end{align}
-which corresponds to the Laplace transform of the exponentially tilted stable distribution where the exact sampler exists \citep{devroye2009random,hofert2011sampling}.
+which corresponds to the Laplace transform of the exponentially tilted stable distribution where the exact sampler exists \citep{devroye2009random,hofert2011sampling}. Taking the derivative of $t$ and set $t=0$ shows the expected sum of weights is $\alpha \tau^{\sigma-1}$.
+
+\subsubsection{Gamma Process}
+If $\sigma = 0$, then the GGP will be the Gamma process of which normalisation is well known Dirichlet process.
+
+The expected number of partitions $\mathbb{E}[N_k] = \sum_{i=1}^{n} \frac{\alpha}{\alpha + i - 1} = \alpha (\Psi(\alpha + n) - \Psi(\alpha)) = O(\alpha \log n)$, where $\Psi$ is a digamma function.
 
 \subsection{Beta Process}
 \begin{align}
 \nu(dw, dx) = \alpha w^{-1}(1-w)^{\alpha-1} dw H_0(dx)
 \end{align}
+
+\section{Auxiliary}
+\begin{itemize}
+\item Stirling's approximation $\Gamma(n+1) \approx \sqrt{2\pi n}(n/e)^{n}$
+\end{itemize}
 
 
 \bibliographystyle{apalike}

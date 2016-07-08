@@ -22,7 +22,7 @@
 \maketitle
 
 \section{Completely Random Measure}
-A completely random measure (CRM) $\mu$ on $\mathbb{R}_+$ is a random measure such that for any countable number of disjoint measurable sets $A_1, A_2, ...$ of $\mathbb{R}_+$, the random variable $\mu(A_1), \mu(A_2), ...$ are independent and $\mu(\cup_i A_i) = \sum_i \mu(A_i)$. If one assumes that the distribution of $\mu([t,s])$ only depends on $t-s$ then the CRM takes the form of $\mu = \sum_{i=1}^{\infty}w_i\delta_{\theta_i}$ where $(w_i, \theta_i)$ are the points of a Poisson point process on $\mathbb{R}_+^2$ with L\'{e}vy intensity measure $\nu(dw, d\theta) = \rho(dw)\lambda(d\theta)$. The Laplace transform of $\mu(A)$ on any measurable set $A$ has a following representation: $\mathbb{E}[e^{-t\mu(A)}] = \exp(-\int_{\mathbb{R}_+ \times A}(1-e^{-tw})\rho(dw)\lambda(d\theta))$ for any $t>0$ and $\rho$ such that $\int_{\mathbb{R}_+}(1-e^{-w})\rho(dw) < \infty$. Laplace exponent is $\psi(t) = \int_{\mathbb{R}} (1 - e^{-t w}) \rho(dw)$.
+A completely random measure (CRM) $\mu$ on $\mathbb{R}_+$ is a random measure such that for any countable number of disjoint measurable sets $A_1, A_2, ...$ of $\mathbb{R}_+$, the random variable $\mu(A_1), \mu(A_2), ...$ are independent and $\mu(\cup_i A_i) = \sum_i \mu(A_i)$. If one assumes that the distribution of $\mu([t,s])$ only depends on the difference $t-s$ then the CRM takes the form of $\mu = \sum_{i=1}^{\infty}w_i\delta_{\theta_i}$ where $(w_i, \theta_i)$ are the points of a Poisson point process on $\mathbb{R}_+^2$ with L\'{e}vy intensity measure $\nu(dw, d\theta) = \rho(dw)\lambda(d\theta)$\footnote{Subordinator.}. The Laplace transform of $\mu(A)$ on any measurable set $A$ has a following representation: $\mathbb{E}[e^{-t\mu(A)}] = \exp(-\int_{\mathbb{R}_+ \times A}(1-e^{-tw})\rho(dw)\lambda(d\theta))$ for any $t>0$ and $\rho$ such that $\int_{\mathbb{R}_+}(1-e^{-w})\rho(dw) < \infty$. Laplace exponent is $\psi(t) = \int_{\mathbb{R}} (1 - e^{-t w}) \rho(dw)$.
 
 \section{Caron and Fox Model}
 
@@ -122,38 +122,71 @@ Using this urn representation, we can rewrite the generative process as
 \item $D_{\alpha\beta} = \sum_{d=1}^{D_{\alpha\beta}^*} \delta_{(\theta_{di}, \theta_{dj}, \theta_{dk})}$,
 \end{enumerate}
 
-\subsection{Characteristics of Random Graph}
-Unlike the two-dimensional space case, graph prior on three dimensional space may have various definition of the sparsity of the graph. Since our focus here is the growth rate of various statistics as the graph restriction $\alpha$ and $\beta$ increase. We list some statistics to characterise the random graph.
+\subsection{Characteristics of Random Graph in Gamma process case ($\sigma=0$)}
+In case $\sigma=0$, $\rho(dw)$ is an intensity of the Gamma process where the sum of the weights $\mu_\alpha^*$ follows Gamma distribution with shape parameter $\alpha$ and scale parameter $\tau$.
 
-To compute the (expected) growth rate of the number of triples with respect to the number of entities and relations, we first identify the growth rate of the number of triples, entities, and relations with respect to the varying graph restriction $\alpha$ and $\beta$. Let $N^{e}_{\alpha\beta}$ be the number of triples given $\alpha$ and $\beta$, $N_{\alpha}$ be the number of entities given $\alpha$, and $N_{\beta}$ be the number of relations given $\beta$. Here are some statistics that might help to shape these characteristics.
-
+\subsubsection{Expected number of triples}
+From the generative process of the random graph, the number of total edge follows the poisson distribution with mean intensity $\mu^{*2}_\alpha \mu^*_\beta$.
 \begin{align}
-\frac{E[N^e_{\alpha\beta}]}{E[N_\alpha N_\beta]} &\text{ as }\alpha \rightarrow \infty, \beta \rightarrow \infty \\
-\frac{E[N_\alpha|\beta]}{\alpha} &\text{ as } \alpha \rightarrow \infty \\
-\frac{E[N_\alpha]}{\alpha} &\text{ as } \alpha \rightarrow \infty \\
-\frac{E[N_\beta|\alpha]}{\beta} &\text{ as } \beta \rightarrow \infty \\
-\frac{E[N_\beta]}{\beta} &\text{ as } \beta \rightarrow \infty \\
-\frac{E[N^e_{\alpha\beta}]}{\alpha\beta} &\text{ as }\alpha \rightarrow \infty, \beta \rightarrow \infty \\
-\frac{E[N^e_{\alpha}|\beta]}{\alpha} &\text{ as }\alpha \rightarrow \infty
+\mathbb{E}[D^*_{\alpha\beta}] & = \mathbb{E}[\mu^{*2}_\alpha]\mathbb{E}[\mu^*_\beta] \\ 
+&= (\text{Var}(\mu^*_\alpha) + \mathbb{E}[\mu^{*}_\alpha]^2)\mathbb{E}[\mu^*_\beta]\\
+& = \frac{\alpha(\alpha+1)}{\tau} \frac{\beta}{\tau}
 \end{align}
 
-
-\begin{theorem} \label{thm:edge} Consider the point process $\bar{Z}$ with infinite-activity intensity measures $\rho(dw)$ and $\rho'(dw')$. Given $\mu'$ from $\rho'(dw')$, the number of edges in $\bar{Z}_{\alpha}$ grows quadratically as $\alpha \rightarrow \infty$ almost surely.
-\end{theorem}
-\begin{proof}
-$\sum_{k=1}^{\infty} w_k' < \infty$ a.s. When $\mu'$ is given and the sum of $w_k'$ is finite a.s., we can use the same proof technique used in \cite{Caron2015}.
-\end{proof}
-What if $\mu'$ is not given? Let $(X_i)$ and $(Y_k)$ be i.i.d. real-valued random variable from $p$ and $q$, respectively, and let $h(x_1, x_2, y_1)$ be a measurable function symmetric in the first two arugments. 
+\subsubsection{Expected number of entities and relations}
+From the generative process of the random graph, we can compute the expected number of entities $N_\alpha$ as
 \begin{align}
-\frac{2 \sum_{i<j}\sum_{k} h(X_i, X_j, Y_k)}{n_x(n_x -1) n_y} \xrightarrow[]{?} \mathbb{E}[h(X_i, X_j, Y_k)]\quad a.s.\quad as \quad n\rightarrow \infty
+\mathbb{E}[N_\alpha|D^*_{\alpha\beta}] = \mathbb{E}\bigg[\sum_{i=1}^{2D^*_{\alpha\beta}} Y_i\bigg],
 \end{align}
-If this strong law of the large numbers for two samples is correct, we may proof Theorem 3.1 in more general case ($\mu'$ is not given).
+where
+\begin{align}
+Y_i \sim \text{Ber}\bigg(\frac{\alpha}{\alpha+i-1}\bigg).
+\end{align}
+So, the expected number of entities for the large number of $2D^*_{\alpha\beta}$ can be approximated as
+\begin{align}
+\mathbb{E}[N_\alpha|D^*_{\alpha\beta}] = \sum_{i=1}^{2D^*_{\alpha\beta}}\frac{\alpha}{\alpha+i-1} = \alpha(\Psi(\alpha + 2D^*_{\alpha\beta}) - \Psi(\alpha)) \approx \alpha \log (\alpha + 2D^*_{\alpha\beta})
+\end{align}
+where $\Psi$ is a digamma function \citep{arratia2003logarithmic}. By using Theorem 8 in \citep{Caron2015}, we can further show $\mathbb{E}[N_\alpha] = \Theta(\alpha \log\alpha)$ as $\alpha \rightarrow \infty$.
+The expected number of relations can be computed in a similar way:
+\begin{align}
+\mathbb{E}[N_\beta|D^*_{\alpha\beta}] = \sum_{j=1}^{D^*_{\alpha\beta}}\frac{\beta}{\beta+j-1} = \beta(\Psi(\beta + D^*_{\alpha\beta}) - \Psi(\beta)) \approx \beta \log (\beta + D^*_{\alpha\beta})
+\end{align}
+Since $N_\alpha$ and $N_\beta$ is independent,
+\begin{align}
+\mathbb{E}[N_\alpha N_\beta|D^*_{\alpha\beta}] \approx \alpha \log (\alpha + 2D^*_{\alpha\beta}) \times \beta \log (\beta + D^*_{\alpha\beta})
+\end{align}
 
-\begin{theorem} Consider the point process $\bar{Z}$ with infinite-activity intensity measures $\rho(dw)$ and $\rho'(dw')$. Let $N_\alpha$ be a number of nodes having at least one connection. Given $\mu'$ from $\rho'(dw')$, the number of nodes $N_\alpha$ in $\bar{Z}_{\alpha}$ grows superlinearly as $\alpha \rightarrow \infty$ almost surely.
-\end{theorem}
-\begin{proof}
-As \ref{thm:edge}.
-\end{proof}
+%Unlike the two-dimensional space case, graph prior on three dimensional space may have various definition of the sparsity of the graph. Since our focus here is the growth rate of various statistics as the graph restriction $\alpha$ and $\beta$ increase. We list some statistics to characterise the random graph.
+%
+%To compute the (expected) growth rate of the number of triples with respect to the number of entities and relations, we first identify the growth rate of the number of triples, entities, and relations with respect to the varying graph restriction $\alpha$ and $\beta$. Let $N^{e}_{\alpha\beta}$ be the number of triples given $\alpha$ and $\beta$, $N_{\alpha}$ be the number of entities given $\alpha$, and $N_{\beta}$ be the number of relations given $\beta$. Here are some statistics that might help to shape these characteristics.
+%
+%\begin{align}
+%\frac{E[N^e_{\alpha\beta}]}{E[N_\alpha N_\beta]} &\text{ as }\alpha \rightarrow \infty, \beta \rightarrow \infty \\
+%\frac{E[N_\alpha|\beta]}{\alpha} &\text{ as } \alpha \rightarrow \infty \\
+%\frac{E[N_\alpha]}{\alpha} &\text{ as } \alpha \rightarrow \infty \\
+%\frac{E[N_\beta|\alpha]}{\beta} &\text{ as } \beta \rightarrow \infty \\
+%\frac{E[N_\beta]}{\beta} &\text{ as } \beta \rightarrow \infty \\
+%\frac{E[N^e_{\alpha\beta}]}{\alpha\beta} &\text{ as }\alpha \rightarrow \infty, \beta \rightarrow \infty \\
+%\frac{E[N^e_{\alpha}|\beta]}{\alpha} &\text{ as }\alpha \rightarrow \infty
+%\end{align}
+%
+%
+%\begin{theorem} \label{thm:edge} Consider the point process $\bar{Z}$ with infinite-activity intensity measures $\rho(dw)$ and $\rho'(dw')$. Given $\mu'$ from $\rho'(dw')$, the number of edges in $\bar{Z}_{\alpha}$ grows quadratically as $\alpha \rightarrow \infty$ almost surely.
+%\end{theorem}
+%\begin{proof}
+%$\sum_{k=1}^{\infty} w_k' < \infty$ a.s. When $\mu'$ is given and the sum of $w_k'$ is finite a.s., we can use the same proof technique used in \cite{Caron2015}.
+%\end{proof}
+%What if $\mu'$ is not given? Let $(X_i)$ and $(Y_k)$ be i.i.d. real-valued random variable from $p$ and $q$, respectively, and let $h(x_1, x_2, y_1)$ be a measurable function symmetric in the first two arugments. 
+%\begin{align}
+%\frac{2 \sum_{i<j}\sum_{k} h(X_i, X_j, Y_k)}{n_x(n_x -1) n_y} \xrightarrow[]{?} \mathbb{E}[h(X_i, X_j, Y_k)]\quad a.s.\quad as \quad n\rightarrow \infty
+%\end{align}
+%If this strong law of the large numbers for two samples is correct, we may proof Theorem 3.1 in more general case ($\mu'$ is not given).
+%
+%\begin{theorem} Consider the point process $\bar{Z}$ with infinite-activity intensity measures $\rho(dw)$ and $\rho'(dw')$. Let $N_\alpha$ be a number of nodes having at least one connection. Given $\mu'$ from $\rho'(dw')$, the number of nodes $N_\alpha$ in $\bar{Z}_{\alpha}$ grows superlinearly as $\alpha \rightarrow \infty$ almost surely.
+%\end{theorem}
+%\begin{proof}
+%As \ref{thm:edge}.
+%\end{proof}
 
 \subsection{Posterior inference}
 We first characterise the posterior of $\mu_\alpha$ given $\mu'_\beta$ and $D_{\alpha\beta}$. The conditional Laplace functional of $\mu_\alpha$ given $D_{\alpha\beta}$ is $\mathbb{E}[e^{-\mu_\alpha(f)}|\mu'_\beta, D_{\alpha\beta}]$, for any non-negative measurable function $f$ such that $\mu_\alpha(f) = \sum_{i=1}^{\infty}w_i f(\theta_i)$. We have $\mu_\alpha(f) = \Pi(\tilde{f})$ where $\Pi = \sum_{i=1}^{\infty} \delta_{w_i, \theta_i}$ is a Poisson random measure on $\mathcal{S} = (0, \infty) \times [0, \alpha]$ with mean measure $\rho \times \lambda$ and $\tilde{f}(w, \theta) = wf(\theta)$. Let $n_{i**} = \sum_{j=1}^{N_\alpha}\sum_{k=1}^{N_\beta}n_{ijk}$, $m_i = \sum_{j=1}^{N_\alpha}\sum_{k=1}^{N_\beta} n_{ijk} + n_{jik}$, and $m'_k = \sum_{i=1}^{N_\alpha} \sum_{j=1}^{N_\alpha} n_{ijk}$.
