@@ -53,6 +53,6 @@ def GGPgraphrnd(alpha, sigma, tau, T=0):
     D = csc_matrix((np.ones(len(new_idx[0])), (new_idx[0], new_idx[1])), shape=(g_size, g_size))  # directed multigraph
     G = D + D.T  # undirected multigraph
     nnz = G.nonzero()
-    G = csc_matrix((np.ones(len(nnz[0])), (nnz))) # undirected simple graph
+    G = csc_matrix((np.ones(len(nnz[0])), (nnz)), shape=(g_size, g_size)) # undirected simple graph
 
     return G, D, w, w_rem, alpha, sigma, tau

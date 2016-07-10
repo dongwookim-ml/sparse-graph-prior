@@ -91,7 +91,7 @@ def KGgraphrnd(alpha, beta, sigma_alpha, sigma_beta, tau_alpha, tau_beta, T=0):
 
         _G = D + D.T  # undirected multigraph
         nnz = _G.nonzero()
-        _G = csc_matrix((np.ones(len(nnz[0])), (nnz)))  # undirected simple graph
+        _G = csc_matrix((np.ones(len(nnz[0])), (nnz)), shape=(g_size, g_size))  # undirected simple graph
         G.append(_G)
 
     return G, w_alpha, w_alpha_rem, alpha, sigma_alpha, tau_alpha, w_beta, w_beta_rem, beta, sigma_beta, tau_beta
