@@ -203,14 +203,14 @@ def GGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
     http://www.stats.ox.ac.uk/~caron/code/bnpgraph/index.html
 
     :param G:sparse logical adjacency matrix
-    :param modelparam: structure of model parameters with the following fields:
+    :param modelparam: dictionary of model parameters with the following fields:
         -  alpha: if scalar, the value of alpha. If vector of length
            2, parameters of the gamma prior over alpha
         -  sigma: if scalar, the value of sigma. If vector of length
            2, parameters of the gamma prior over (1-sigma)
         -  tau: if scalar, the value of tau. If vector of length
            2, parameters of the gamma prior over tau
-    :param mcmcparam: structure of mcmc parameters with the following fields:
+    :param mcmcparam: dictionary of mcmc parameters with the following fields:
         - niter: number of MCMC iterations
         - nburn: number of burn-in iterations
         - thin: thinning of the MCMC output
@@ -244,8 +244,8 @@ def GGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
     else:
         issimple = False
 
-    if not modelparam.alpha is None:
-        alpha = modelparam.alpha
+    if 'alpha' in modelparam:
+        alpha = modelparam['alpha']
         estimated_alpha = 0
     else:
         alpha = 100. * np.random.random()
@@ -253,15 +253,15 @@ def GGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
 
     logalpha = log(alpha)
 
-    if not modelparam.sigma is None:
-        sigma = modelparam.sigma
+    if 'sigma' in modelparam:
+        sigma = modelparam['sigma']
         estimated_sigma = 0
     else:
         sigma = 2. * np.random.random() - 1.
         estimated_sigma = 1
 
-    if not modelparam.tau is None:
-        tau = modelparam.tau
+    if 'tau' in modelparam:
+        tau = modelparam['tau']
         estimated_tau = 0
     else:
         sigma = 10. * np.random.random()
@@ -284,13 +284,13 @@ def GGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
     w_rem = np.random.gamma(1., 1.)
 
     # parameters of the MCMC algorithm
-    niter = mcmcparam.niter
-    nburn = mcmcparam.nburn
-    thin = mcmcparam.thin
-    L = mcmcparam.leapfrog_L
-    epsilon = mcmcparam.leapfrog_epsilon / K ** (1. / 4.)
+    niter = mcmcparam['niter']
+    nburn = mcmcparam['nburn']
+    thin = mcmcparam['thin']
+    L = mcmcparam['leapfrog.L']
+    epsilon = mcmcparam['leapfrog.epsilon'] / K ** (1. / 4.)
     # Choice of update for the latent (Gibbs/MH)
-    if mcmcparam.latent_MH_nb == 0:
+    if mcmcparam['latent.MH_nb'] == 0:
         update_n = update_n_Gibbs
     else:
         update_n = update_n_MH
@@ -327,9 +327,9 @@ def GGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
             rw_alpha = False
 
         w_rem, alpha, logalpha, sigma, tau, rate2[i] = update_hyper(w, logw, w_rem, alpha, logalpha, sigma, tau,
-                                                                    mcmcparam.hyper_MH_nb, mcmcparam.hyper_rw_std,
+                                                                    mcmcparam['hyper.MH_nb'], mcmcparam['hyper.rw_std'],
                                                                     estimated_alpha, estimated_sigma, estimated_tau,
-                                                                    modelparam.alpha, modelparam.sigma, modelparam.tau,
+                                                                    modelparam['alpha'], modelparam['sigma'], modelparam['tau'],
                                                                     rw_alpha)
 
         N, n, count = update_n(logw, n, K, count, ind1, ind2)
@@ -352,7 +352,7 @@ def GGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
 
         if i > nburn and (i - nburn) % thin == 0:
             ind = ((i - nburn) / thin)
-            if mcmcparam.store_w:
+            if mcmcparam['store_w']:
                 w_st[ind] = w
             w_rem_st[ind] = w_rem
             logalpha_st[ind] = logalpha

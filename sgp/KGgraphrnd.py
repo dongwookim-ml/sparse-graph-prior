@@ -89,9 +89,8 @@ def KGgraphrnd(alpha, beta, sigma_alpha, sigma_beta, tau_alpha, tau_beta, T=0):
                         (new_entity_idx[0][relation_entities], new_entity_idx[1][relation_entities])),
                        shape=(g_size, g_size))  # directed multigraph
 
-        _G = D + D.T  # undirected multigraph
-        nnz = _G.nonzero()
-        _G = csc_matrix((np.ones(len(nnz[0])), (nnz)), shape=(g_size, g_size))  # undirected simple graph
+        nz = D.nonzero()
+        _G = csc_matrix((np.ones(len(nz[0])), (nz)), shape=(g_size, g_size)) #directed simple graph
         G.append(_G)
 
     return G, w_alpha, w_alpha_rem, alpha, sigma_alpha, tau_alpha, w_beta, w_beta_rem, beta, sigma_beta, tau_beta

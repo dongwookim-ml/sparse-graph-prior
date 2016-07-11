@@ -78,7 +78,7 @@ def GGPrnd(alpha, sigma, tau, T=0):
             raise Warning("Expected number of jumps = %d" % Njumps)
 
     # Adaptive thinning strategy
-    N = np.zeros(np.ceil(Njumps + 3 * np.sqrt(Njumps)))
+    N = np.zeros(int(np.ceil(Njumps + 3 * np.sqrt(Njumps))))
     k = 0
     t = T
     count = 0
