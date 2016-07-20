@@ -12,7 +12,7 @@ from .GGPutils import GGPpsi, GGPkappa, GGPsumrnd
 def tpoissonrnd(rate):
     # sample from a zero-truncated poisson distribution (support: strictly positive integer)
     x = np.ones(rate.shape)
-    ind = rate > 1e-5 # below this value, x=1 w. very high prob.
+    ind = rate > 1e-5  # below this value, x=1 w. very high prob.
     rate_ind = rate[ind]
     x[ind] = poisson.ppf(exp(-rate_ind) + np.random.random(rate_ind.shape) * (1. - exp(-rate_ind)), rate_ind)
     return x
@@ -27,7 +27,7 @@ def update_n_Gibbs(logw, K, ind1, ind2):
     lograte_poi[ind1 == ind2] = 2. * logw[ind1[ind1 == ind2]]
     d = tpoissonrnd(exp(lograte_poi))
     count = csr_matrix((d, (ind1, ind2)), (K, K))
-    N = np.sum(count, 0) + np.sum(count, 1)
+    N = count.sum(0) + count.sum(1)
 
     return N, d, count
 
@@ -40,7 +40,7 @@ def update_n_MH(logw, d, K, count, ind1, ind2, nbMH):
         dprop = d
         dprop[ind] = 2
         if np.sum(ind == 0) > 0:
-            dprop[ind == 0] += 2. * np.random.randint(0, 1, size=np.sum(ind == 0)) - 3
+            dprop[ind == 0] = dprop[ind == 0] + 2. * np.random.randint(0, 2, size=np.sum(ind == 0)) - 3
 
         logqprop = np.zeros(ind.shape)
         logqprop[ind == 0] = log(.5)
@@ -52,11 +52,11 @@ def update_n_MH(logw, d, K, count, ind1, ind2, nbMH):
 
         diff_d = (dprop - d)
         logaccept_d = diff_d * lograte_poi - gammaln(dprop + 1.) + gammaln(d + 1.) - logqprop + logq
-
+        logaccept_d[np.isnan(logaccept_d)] = -np.Inf
         indaccept = log(np.random.random(logaccept_d.shape)) < logaccept_d
         d[indaccept] = dprop[indaccept]
         count += csr_matrix((diff_d[indaccept], (ind1[indaccept], ind2[indaccept])), (K, K))
-        N = np.sum(count, 0) + np.sum(count, 1)
+        N = count.sum(0) + count.sum(1)
 
     return N, d, count
 
@@ -84,9 +84,9 @@ def update_w(w, logw, w_rem, N, L, epsilon, sigma, tau, issimple):
     temp1 = -sumall_wprop ** 2. + sumall_w ** 2 + np.sum(
         (N - sigma - 1.) * (logwprop - logw) - tau * (sum_wprop - sum_w))
 
-    logaccept = temp1 - .5 * np.sum(pprop ** 2. - p ** 2) - np.sum(logw) + np.sum(logwprop)
+    logaccept = temp1 - .5 * np.sum(pprop ** 2 - p ** 2) - np.sum(logw) + np.sum(logwprop)
     if issimple:
-        logaccept += np.sum(wprop ** 2.) - np.sum(w ** 2.)
+        logaccept += np.sum(wprop ** 2) - np.sum(w ** 2)
 
     if np.isnan(logaccept):
         logaccept = -np.Inf
@@ -141,7 +141,10 @@ def update_hyper(w, logw, w_rem, alpha, logalpha, sigma,
                 alphaprop = exp(logalphaprop)
                 rate_K = exp(logalphaprop - log(-sigmaprop) + sigmaprop * log(tauprop + 2. * sum_w + 2. * w_rem))
                 num_clust = np.random.poisson(rate_K)
-                wprop_rem = np.random.gamma(-sigmaprop * num_clust, 1. / (tauprop + 2. * sum_w + 2. * w_rem))
+                if num_clust == 0:
+                    wprop_rem = 0
+                else:
+                    wprop_rem = np.random.gamma(-sigmaprop * num_clust, 1. / (tauprop + 2. * sum_w + 2. * w_rem))
             else:
                 alphaprop = alpha
                 logalphaprop = logalpha
@@ -216,35 +219,37 @@ def GGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
         - thin: thinning of the MCMC output
         - leapfrog.L: number of leapfrog steps
         - leapfrog.epsilon: leapfrog stepsize
+        - leapfrog.nadapt: number of iterations for adaptation (default:nburn/2)
         - latent.MH_nb: number of MH iterations for latent (if 0: Gibbs update)
         - hyper.MH_nb: number of MH iterations for hyperparameters
         - hyper.rw_std: standard deviation of the random walk
         - store_w: logical. If true, returns MCMC draws of w
-    :param typegraph: type of graph ('undirected' or 'simple')
+    :param typegraph: type of graph ('undirected' or 'simple') simple graph does
+        not contain any self-loop
     :param verbose: logical. If true (default), print informatio
     :return:
-        - samples: structure with the MCMC samples for the variables
+        - samples: dictionary with the MCMC samples for the variables
             - w
             - w_rem
             - alpha
             - logalpha
             - sigma
             - tau
-        - stats: structure with summary stats about the MCMC algorithm
-            - rate: acceptance rate of the HMC step at each iteration
-            - rate2: acceptance rate of the MH for the hyperparameters at
+        - stats: dictionary with summary stats about the MCMC algorithm
+            - w_rate: acceptance rate of the HMC step at each iteration
+            - hyper_rate: acceptance rate of the MH for the hyperparameters at
                 each iteration
     """
 
-    if not G is G.T or not len(np.unique(G)) != 2:
-        raise Exception("Adjacency matrix G must be a symmetric binary matrix")
+    # if not G is G.T or not len(np.unique(G.data)) != 1:
+    #     raise Exception("Adjacency matrix G must be a symmetric binary matrix")
 
     if typegraph is 'simple':
         issimple = True
     else:
         issimple = False
 
-    if 'alpha' in modelparam:
+    if not np.iterable(modelparam['alpha']):
         alpha = modelparam['alpha']
         estimated_alpha = 0
     else:
@@ -253,18 +258,18 @@ def GGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
 
     logalpha = log(alpha)
 
-    if 'sigma' in modelparam:
+    if not np.iterable(modelparam['sigma']):
         sigma = modelparam['sigma']
         estimated_sigma = 0
     else:
         sigma = 2. * np.random.random() - 1.
         estimated_sigma = 1
 
-    if 'tau' in modelparam:
+    if not np.iterable(modelparam['tau']):
         tau = modelparam['tau']
         estimated_tau = 0
     else:
-        sigma = 10. * np.random.random()
+        tau = 10. * np.random.random()
         estimated_tau = 1
 
     K = G.shape[0]  # nodes
@@ -278,7 +283,7 @@ def GGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
 
     n = np.random.randint(0, 9, size=len(ind1))
     count = csr_matrix((n, (ind1, ind2)), (K, K), dtype=int)
-    N = np.sum(count, 0) + np.sum(count, 1)
+    N = count.sum(0) + count.sum(1)
     w = np.random.gamma(1., 1., size=K)
     logw = log(w)
     w_rem = np.random.gamma(1., 1.)
@@ -289,14 +294,9 @@ def GGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
     thin = mcmcparam['thin']
     L = mcmcparam['leapfrog.L']
     epsilon = mcmcparam['leapfrog.epsilon'] / K ** (1. / 4.)
-    # Choice of update for the latent (Gibbs/MH)
-    if mcmcparam['latent.MH_nb'] == 0:
-        update_n = update_n_Gibbs
-    else:
-        update_n = update_n_MH
 
     # To store MCMC samples
-    n_samples = (niter - nburn) / thin
+    n_samples = int((niter - nburn) / thin)
     w_st = np.zeros((n_samples, K))
     w_rem_st = np.zeros(n_samples)
     alpha_st = np.zeros(n_samples)
@@ -310,14 +310,14 @@ def GGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
     tic = time.time()
     for i in range(niter):
         if verbose and i % 2000 == 0:
-            print('i=%d\n' % i)
-            print('alpha=%.2f\n' % alpha)
-            print('sigma=%.3f\n' % sigma)
-            print('tau=%.2f\n' % tau)
+            print('Iteration=%d' % i, flush=True)
+            print('\talpha = %.2f' % alpha, flush=True)
+            print('\tsigma = %.3f' % sigma, flush=True)
+            print('\ttau   = %.3f' % tau, flush=True)
 
         # update w using Hamiltonian Monte Carlo
         w, logw, rate[i] = update_w(w, logw, w_rem, N, L, epsilon, sigma, tau, issimple)
-        if i < mcmcparam.leapfrog_nadapt:
+        if i < mcmcparam['leapfrog.nadapt']:
             epsilon = exp(log(epsilon) + .01 * (np.mean(rate[:i]) - 0.6))
 
         # update w_rem and hyperparameters using Metropolis-Hastings
@@ -329,10 +329,14 @@ def GGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
         w_rem, alpha, logalpha, sigma, tau, rate2[i] = update_hyper(w, logw, w_rem, alpha, logalpha, sigma, tau,
                                                                     mcmcparam['hyper.MH_nb'], mcmcparam['hyper.rw_std'],
                                                                     estimated_alpha, estimated_sigma, estimated_tau,
-                                                                    modelparam['alpha'], modelparam['sigma'], modelparam['tau'],
+                                                                    modelparam['alpha'], modelparam['sigma'],
+                                                                    modelparam['tau'],
                                                                     rw_alpha)
 
-        N, n, count = update_n(logw, n, K, count, ind1, ind2)
+        if mcmcparam['latent.MH_nb'] == 0:
+            N, n, count = update_n_Gibbs(logw, n, K, count, ind1, ind2)
+        else:
+            N, n, count = update_n_MH(logw, n, K, count, ind1, ind2, mcmcparam['latent.MH_nb'])
 
         if np.isnan(alpha):
             raise Exception('alpha is not a number')
@@ -342,16 +346,17 @@ def GGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
             toc = (time.time() - tic) * niter / 10.
             hours = np.floor(toc / 3600)
             minutes = (toc - hours * 3600.) / 60.
-            print('-----------------------------------\n')
-            print('Start MCMC for GGP graphs\n')
-            print('Nb of nodes: %d - Nb of edges: %d\n' % (K, np.sum(G2)))
-            print('Number of iterations: %d\n' % niter)
-            print('Estimated computation time: %.0f hour(s) %.0f minute(s)\n' % (hours, minutes))
-            # print('Estimated end of computation: %s \n'% datestr(now + time/3600/24))
-            print('-----------------------------------\n')
+            print('-----------------------------------', flush=True)
+            print('Start MCMC for GGP graphs', flush=True)
+            print('Nb of nodes: %d - Nb of edges: %d' % (K, G2.sum()), flush=True)
+            print('Number of iterations: %d' % niter, flush=True)
+            print('Estimated computation time: %.0f hour(s) %.0f minute(s)' % (hours, minutes), flush=True)
+            print('Estimated end of computation: ', time.strftime('%b %dth, %H:%M:%S', time.localtime(tic + toc)),
+                  flush=True)
+            print('-----------------------------------', flush=True)
 
         if i > nburn and (i - nburn) % thin == 0:
-            ind = ((i - nburn) / thin)
+            ind = int((i - nburn) / thin)
             if mcmcparam['store_w']:
                 w_st[ind] = w
             w_rem_st[ind] = w_rem
@@ -360,16 +365,25 @@ def GGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
             sigma_st[ind] = sigma
             tau_st[ind] = tau
 
-    samples = [w_st, w_rem_st, alpha_st, logalpha_st, sigma_st, tau_st]
-    stats = [rate, rate2]
+    samples = dict()
+    samples['w'] = w_st
+    samples['w_rem'] = w_rem_st
+    samples['alpha'] = alpha_st
+    samples['logalpha'] = logalpha_st
+    samples['sigma'] = sigma_st
+    samples['tau'] = tau_st
+
+    stats = dict()
+    stats['w_rate'] = rate
+    stats['hyper_rate'] = rate2
 
     toc = time.time() - tic
     hours = np.floor(toc / 3600)
     minutes = (toc - hours * 3600.) / 60.
-    print('-----------------------------------\n')
-    print('End MCMC for GGP graphs\n')
-    print('Computation time: %.0f hour(s) %.0f minute(s)\n' % (hours, minutes))
-    # print('End of computation: %s \n', datestr(now))
-    print('-----------------------------------\n')
+    print('-----------------------------------', flush=True)
+    print('End MCMC for GGP graphs', flush=True)
+    print('Computation time: %.0f hour(s) %.0f minute(s)' % (hours, minutes), flush=True)
+    print('End of computation: ', time.strftime('%b %dth, %H:%M:%S', time.localtime(time.time())), flush=True)
+    print('-----------------------------------', flush=True)
 
     return samples, stats

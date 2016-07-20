@@ -22,7 +22,10 @@ def GGPsumrnd(alpha, sigma, tau):
     if sigma < -10 ** -8:
         # Compound Poisson case
         K = np.random.poisson(-alpha / sigma / tau ** (-sigma))
-        S = np.random.gamma(-sigma * K, 1 / tau)
+        if K == 0:
+            S = 0
+        else:
+            S = np.random.gamma(-sigma * K, 1 / tau)
     elif sigma < 10 ** -8:
         # Gamma process case
         # S is gamma distributed
