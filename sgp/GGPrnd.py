@@ -47,7 +47,7 @@ def GGPrnd(alpha, sigma, tau, T=0):
 
     # finite activity GGP, don't need to truncate
     if sigma < 0:
-        rate = np.exp(np.log(alpha) - np.log(-sigma) + sigma + np.log(tau))
+        rate = np.exp(np.log(alpha) - np.log(-sigma) + sigma * np.log(tau))
         K = np.random.poisson(rate)
         N = np.random.gamma(-sigma, scale=1. / tau, size=K)
         T = 0
