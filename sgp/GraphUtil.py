@@ -2,7 +2,8 @@ import numpy as np
 from collections import defaultdict
 from scipy.sparse import csr_matrix, csc_matrix, triu
 
-def computeGrowthRate(G, n_repeat=10):
+
+def compute_growth_rate(G, n_repeat=10):
     """
     Compute the growth rate of graph G
 
@@ -38,7 +39,7 @@ def computeGrowthRate(G, n_repeat=10):
     return np.array([np.mean(n_link[x]) for x in range(n_n)])
 
 
-def degreeDistribution(G):
+def degree_distribution(G):
     d = defaultdict(int)
     # degree = triu(G).sum(0)
 
@@ -50,3 +51,7 @@ def degreeDistribution(G):
         d[int(_d)] += 1
 
     return d, [d[i] for i in range(int(max_d))]
+
+
+def degree_one_nodes(G):
+    return np.sum(G.sum(0) / 2 == 1)
