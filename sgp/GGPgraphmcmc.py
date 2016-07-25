@@ -9,11 +9,11 @@ from numpy import log, exp
 from .GGPutils import GGPpsi, GGPkappa, GGPsumrnd
 
 
-def tpoissonrnd(rate):
+def tpoissonrnd(lograte):
     # sample from a zero-truncated poisson distribution (support: strictly positive integer)
-    x = np.ones(rate.shape)
-    ind = rate > 1e-5  # below this value, x=1 w. very high prob.
-    rate_ind = rate[ind]
+    x = np.ones(lograte.shape)
+    ind = lograte > 1e-5  # below this value, x=1 w. very high prob.
+    rate_ind = lograte[ind]
     x[ind] = poisson.ppf(exp(-rate_ind) + np.random.random(rate_ind.shape) * (1. - exp(-rate_ind)), rate_ind)
     return x
 
@@ -25,9 +25,9 @@ def grad_U(N, w, w_rem, sigma, tau):
 def update_n_Gibbs(logw, K, ind1, ind2):
     lograte_poi = log(2.) + logw[ind1] + logw[ind2]
     lograte_poi[ind1 == ind2] = 2. * logw[ind1[ind1 == ind2]]
-    d = tpoissonrnd(exp(lograte_poi))
+    d = tpoissonrnd(lograte_poi)
     count = csr_matrix((d, (ind1, ind2)), (K, K))
-    N = count.sum(0) + count.sum(1)
+    N = count.sum(0).T + count.sum(1)
 
     return N, d, count
 
@@ -56,7 +56,7 @@ def update_n_MH(logw, d, K, count, ind1, ind2, nbMH):
         indaccept = log(np.random.random(logaccept_d.shape)) < logaccept_d
         d[indaccept] = dprop[indaccept]
         count += csr_matrix((diff_d[indaccept], (ind1[indaccept], ind2[indaccept])), (K, K))
-        N = count.sum(0) + count.sum(1)
+        N = count.sum(0).T + count.sum(1)
 
     return N, d, count
 
@@ -281,9 +281,9 @@ def GGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
 
     ind1, ind2 = G2.nonzero()
 
-    n = np.random.randint(0, 9, size=len(ind1))
+    n = np.random.randint(1, 9, size=len(ind1))
     count = csr_matrix((n, (ind1, ind2)), (K, K), dtype=int)
-    N = count.sum(0) + count.sum(1)
+    N = count.sum(0).T + count.sum(1)
     w = np.random.gamma(1., 1., size=K)
     logw = log(w)
     w_rem = np.random.gamma(1., 1.)
