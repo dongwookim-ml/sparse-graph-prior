@@ -245,6 +245,6 @@ TSWLatexianTemp*
 *~[0-9]*
 
 
-test/
+# test/
 
 *.pkl
