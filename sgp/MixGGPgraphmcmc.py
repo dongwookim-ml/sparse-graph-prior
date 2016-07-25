@@ -118,37 +118,47 @@ def MixGGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
             print('\talpha =', alpha, flush=True)
             print('\tsigma =', sigma, flush=True)
             print('\ttau   =', tau, flush=True)
-            print('\t# node for each mixture', [np.sum(pi == m) for m in range(n_mixture)])
-            print('\tJoint log likelihood', logdist, np.sum(logdist))
+            print('\tu     =', u, flush=True)
+            print('\t# node for each mixture', [np.sum(pi == m) for m in range(n_mixture)], flush=True)
+            print('\tJoint log likelihood', logdist, np.sum(logdist), flush=True)
+        # update hyperparam
+        alpha, sigma, tau = update_hyper(N, pi, alpha, sigma, tau, u, n_mixture, modelparam, mcmcparam)
+
         # update jump size
         for m in range(n_mixture):
             J[pi == m], J_rem[m], u[m] = NGGPmcmc(np.sum(N[pi == m]), N[pi == m], alpha[m], sigma[m], tau[m], u[m],
                                                   mcmcparam)
         logJ = log(J)
 
-        # update hyperparam
-        alpha, sigma, tau = update_hyper(N, pi, alpha, sigma, tau, u, n_mixture, modelparam, mcmcparam)
-
         # update node membership
+        n_sum = np.zeros(n_mixture)
         for m in range(n_mixture):
             logdist[m] = joint_logdist(N[pi == m], alpha[m], sigma[m], tau[m], u[m])
+            n_sum[m] = np.sum(N[pi == m])
+
+        # print("DEBUG", logdist, exp(log_normalise(logdist)))
 
         for k in range(K):
             prev_m = pi[k]
 
-            logdist[prev_m] += -log(u[prev_m]) - gammaln(N[k] - sigma[prev_m]) + gammaln(1 - sigma[prev_m])
+            logdist[prev_m] += -log(alpha[prev_m]) - N[k] * log(u[prev_m]) + gammaln(n_sum[prev_m]) \
+                               - gammaln(n_sum[prev_m] - N[k]) + (N[k] - sigma[prev_m]) * log(u[prev_m] + tau[prev_m])
+            n_sum[prev_m] -= N[k]
 
             tmp = np.zeros(n_mixture)
             for m in range(n_mixture):
-                pi[k] = m
-                tmp[m] = logdist[m] + log(u[m]) + gammaln(N[k] - sigma[m]) - gammaln(1 - sigma[m]) \
-                    + dirichlet_multinomial(dir_alpha, pi, n_mixture)
+                tmp[m] = logdist[m] + log(alpha[m]) + N[k] * log(u[m]) - gammaln(n_sum[m]) \
+                         - gammaln(n_sum[m] + N[k]) - (N[k] - sigma[m]) * log(u[m] + tau[m])
 
             tmp = log_normalise(tmp)
             pi[k] = np.random.multinomial(1, tmp).argmax()
-            new_m = pi[k]
+            # print(tmp, pi[k])
 
-            logdist[new_m] += log(u[new_m]) + gammaln(N[k] - sigma[new_m]) - gammaln(1 - sigma[new_m])
+            new_m = pi[k]
+            logdist[new_m] += log(alpha[new_m]) + N[k] * log(u[new_m]) - gammaln(n_sum[new_m]) \
+                              - gammaln(n_sum[new_m] + N[k]) - (N[k] - sigma[new_m]) * log(u[new_m] + tau[new_m])
+
+            n_sum[new_m] += N[k]
 
         # update latent count n
         lograte_poi = log(2.) + logJ[ind1] + logJ[ind2]
@@ -204,15 +214,14 @@ def update_hyper(N, pi, alpha, sigma, tau, u, n_mixture, modelparam, mcmcparam):
                                                             - tau[m] ** sigma[m]) / sigma[m]))
 
         if modelparam['estimate_sigma']:
-            std = np.sqrt(1.)
+            std = np.sqrt(1. / 4.)
             for m in range(n_mixture):
                 prop_sigma = 1 - np.random.lognormal(log(1 - sigma[m]), std)
 
-                log_rate = log_density_sigma(alpha[m], prop_sigma, tau[m], u[m], pi_m[m],
-                                             np.sum(N[pi == m])) + lognorm.logpdf(1 - sigma[m], log(1 - prop_sigma),
-                                                                                  std)
-                - log_density_sigma(alpha[m], sigma[m], tau[m], u[m], pi_m[m], np.sum(N[pi == m])) - norm.logpdf(
-                    1 - prop_sigma, log(1 - sigma[m]), std)
+                log_rate = log_density_sigma(alpha[m], prop_sigma, tau[m], u[m], pi_m[m], np.sum(N[pi == m])) \
+                           + lognorm.logpdf(1 - sigma[m], log(1 - prop_sigma), std) \
+                           - log_density_sigma(alpha[m], sigma[m], tau[m], u[m], pi_m[m], np.sum(N[pi == m])) \
+                           - norm.logpdf(1 - prop_sigma, log(1 - sigma[m]), std)
 
                 if np.isnan(log_rate):
                     log_rate = -np.Inf
@@ -228,7 +237,7 @@ def update_hyper(N, pi, alpha, sigma, tau, u, n_mixture, modelparam, mcmcparam):
         if modelparam['estimate_tau']:
             tau_a = modelparam['tau_a']
             tau_b = modelparam['tau_b']
-            std = np.sqrt(1.)
+            std = np.sqrt(1. / 4.)
             logtau = log(tau)
             for m in range(n_mixture):
                 prop_logtau = np.random.normal(logtau[m], std)

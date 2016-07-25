@@ -24,7 +24,7 @@ def sampling_u(u, n, C, alpha, sigma, tau, n_steps=1):
 
     for i in range(n_steps):
         v = log(u)
-        var = 1.
+        var = 1. / 4.
         std = np.sqrt(var)
         prop_v = np.random.normal(v, std)
 
@@ -44,7 +44,7 @@ def sampling_u(u, n, C, alpha, sigma, tau, n_steps=1):
             v = prop_v
             u = exp(v)
 
-    return exp(v), rate
+    return u, rate
 
 
 def NGGPmcmc(n, pi, alpha, sigma, tau, u, MCMCparams):
@@ -72,7 +72,11 @@ def NGGPmcmc(n, pi, alpha, sigma, tau, u, MCMCparams):
     for iter in range(MCMCparams['j.niter']):
         for i in range(C):
             u, rate = sampling_u(u, n, C, alpha, sigma, tau, MCMCparams['u.MH_nb'])
-            J[i] = np.random.gamma(pi[i] - sigma, u + tau)
+            scale = 1./(u+tau)
+            if scale < 1e-100:
+                J[i] = np.random.gamma(pi[i] - sigma, 1e-100)
+            else:
+                J[i] = np.random.gamma(pi[i] - sigma, 1./(u + tau))
 
         u, rate = sampling_u(u, n, C, alpha, sigma, tau, MCMCparams['u.MH_nb'])
         J_rem = GGPsumrnd(alpha, sigma, u + tau)
