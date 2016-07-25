@@ -4,6 +4,7 @@ import numpy as np
 from numpy import log, exp
 from scipy.sparse import triu, csr_matrix
 from scipy.special import gammaln
+from scipy.stats import norm, lognorm
 
 from .NCRMmcmc import NGGPmcmc
 from .GGPgraphmcmc import tpoissonrnd
@@ -29,12 +30,8 @@ def MixGGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
         - niter: number of MCMC iterations
         - nburn: number of burn-in iterations
         - thin: thinning of the MCMC output
-        - leapfrog.L: number of leapfrog steps
-        - leapfrog.epsilon: leapfrog stepsize
-        - leapfrog.nadapt: number of iterations for adaptation (default:nburn/2)
         - latent.MH_nb: number of MH iterations for latent (if 0: Gibbs update)
         - hyper.MH_nb: number of MH iterations for hyperparameters
-        - hyper.rw_std: standard deviation of the random walk
         - store_w: logical. If true, returns MCMC draws of w
     :param typegraph: type of graph ('undirected' or 'simple') simple graph does
         not contain any self-loop
@@ -68,7 +65,7 @@ def MixGGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
         alpha = modelparam['alpha']
 
     if modelparam['estimate_sigma']:
-        sigma = 2. * np.random.random(size=n_mixture) - 1.
+        sigma = 1 - np.random.lognormal(1, 1, size=n_mixture)
     else:
         sigma = modelparam['sigma']
 
@@ -98,6 +95,8 @@ def MixGGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
     nburn = mcmcparam['nburn']
     thin = mcmcparam['thin']
 
+    dir_alpha = modelparam['dir_alpha']
+
     J = np.zeros(K)
     J_rem = np.zeros(n_mixture)
 
@@ -110,6 +109,7 @@ def MixGGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
 
     rate = np.zeros(niter)
     rate2 = np.zeros(niter)
+    logdist = np.zeros(n_mixture)
 
     tic = time.time()
     for iter in range(niter):
@@ -118,9 +118,18 @@ def MixGGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
             print('\talpha =', alpha, flush=True)
             print('\tsigma =', sigma, flush=True)
             print('\ttau   =', tau, flush=True)
+            print('\t# node for each mixture', [np.sum(pi == m) for m in range(n_mixture)])
+            print('\tJoint log likelihood', logdist, np.sum(logdist))
+        # update jump size
+        for m in range(n_mixture):
+            J[pi == m], J_rem[m], u[m] = NGGPmcmc(np.sum(N[pi == m]), N[pi == m], alpha[m], sigma[m], tau[m], u[m],
+                                                  mcmcparam)
+        logJ = log(J)
+
+        # update hyperparam
+        alpha, sigma, tau = update_hyper(N, pi, alpha, sigma, tau, u, n_mixture, modelparam, mcmcparam)
 
         # update node membership
-        logdist = np.zeros(n_mixture)
         for m in range(n_mixture):
             logdist[m] = joint_logdist(N[pi == m], alpha[m], sigma[m], tau[m], u[m])
 
@@ -131,22 +140,15 @@ def MixGGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
 
             tmp = np.zeros(n_mixture)
             for m in range(n_mixture):
-                tmp[m] = logdist[m] + log(u[m]) + gammaln(N[k] - sigma[m]) - gammaln(1 - sigma[m])
+                pi[k] = m
+                tmp[m] = logdist[m] + log(u[m]) + gammaln(N[k] - sigma[m]) - gammaln(1 - sigma[m]) \
+                    + dirichlet_multinomial(dir_alpha, pi, n_mixture)
 
             tmp = log_normalise(tmp)
             pi[k] = np.random.multinomial(1, tmp).argmax()
             new_m = pi[k]
 
             logdist[new_m] += log(u[new_m]) + gammaln(N[k] - sigma[new_m]) - gammaln(1 - sigma[new_m])
-
-        # update jump size
-        for m in range(n_mixture):
-            J[pi == m], J_rem[m], u[m] = NGGPmcmc(np.sum(N[pi == m]), N[pi == m], alpha[m], sigma[m], tau[m], u[m],
-                                                  mcmcparam)
-        logJ = log(J)
-
-        # update hyperparam
-        alpha, sigma, tau = update_hyper(N, pi, alpha, sigma, tau, u, n_mixture, modelparam, mcmcparam)
 
         # update latent count n
         lograte_poi = log(2.) + logJ[ind1] + logJ[ind2]
@@ -178,20 +180,75 @@ def MixGGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
             tau_st[ind] = tau
 
 
+def log_density_tau(logtau, alpha, sigma, u, n, abs_pi, tau_a, tau_b):
+    return (tau_a - 1) * logtau - exp(logtau) * tau_b \
+           - (alpha / sigma) * ((u + exp(logtau)) ** sigma - exp(sigma * logtau)) \
+           - sigma * abs_pi * logtau - (n - sigma * abs_pi) * log(u + exp(logtau))
+
+
+def log_density_sigma(alpha, sigma, tau, u, abs_pi, n):
+    return -(alpha / sigma) * ((u + tau) ** sigma - tau ** sigma) - sigma * abs_pi * log(tau) \
+           - (n - sigma * abs_pi) * log(u + tau) - log(1 - sigma)
+
+
 def update_hyper(N, pi, alpha, sigma, tau, u, n_mixture, modelparam, mcmcparam):
     pi_m = np.array([np.sum(pi == m) for m in range(n_mixture)])
 
-    if modelparam['estimate_alpha']:
-        alpha_a = modelparam['alpha_a']
-        alpha_b = modelparam['alpha_b']
-        for m in range(n_mixture):
-            alpha[m] = np.random.gamma(alpha_a + pi_m[m], tau[m] / (alpha_b + ((u[m] + tau[m]) ** sigma[m] - tau[m] ** sigma[m])))
+    for i in range(mcmcparam['hyper.MH_nb']):
+        if modelparam['estimate_alpha']:
+            alpha_a = modelparam['alpha_a']
+            alpha_b = modelparam['alpha_b']
+            for m in range(n_mixture):
+                alpha[m] = np.random.gamma(alpha_a + pi_m[m],
+                                           1. / (alpha_b + ((u[m] + tau[m]) ** sigma[m]
+                                                            - tau[m] ** sigma[m]) / sigma[m]))
 
-    if modelparam['estimate_sigma']:
-        pass
+        if modelparam['estimate_sigma']:
+            std = np.sqrt(1.)
+            for m in range(n_mixture):
+                prop_sigma = 1 - np.random.lognormal(log(1 - sigma[m]), std)
 
-    if modelparam['estimate_tau']:
-        pass
+                log_rate = log_density_sigma(alpha[m], prop_sigma, tau[m], u[m], pi_m[m],
+                                             np.sum(N[pi == m])) + lognorm.logpdf(1 - sigma[m], log(1 - prop_sigma),
+                                                                                  std)
+                - log_density_sigma(alpha[m], sigma[m], tau[m], u[m], pi_m[m], np.sum(N[pi == m])) - norm.logpdf(
+                    1 - prop_sigma, log(1 - sigma[m]), std)
+
+                if np.isnan(log_rate):
+                    log_rate = -np.Inf
+
+                if np.isinf(prop_sigma):
+                    log_rate = -np.Inf
+
+                rate = min(1, np.exp(log_rate))
+
+                if np.random.random() < rate:
+                    sigma[m] = prop_sigma
+
+        if modelparam['estimate_tau']:
+            tau_a = modelparam['tau_a']
+            tau_b = modelparam['tau_b']
+            std = np.sqrt(1.)
+            logtau = log(tau)
+            for m in range(n_mixture):
+                prop_logtau = np.random.normal(logtau[m], std)
+
+                # compute acceptance probability
+                log_rate = log_density_tau(prop_logtau, alpha[m], sigma[m], u[m], np.sum(N[pi == m]), pi_m[m], tau_a,
+                                           tau_b) + norm.logpdf(logtau[m], prop_logtau, std) \
+                           - log_density_tau(logtau[m], alpha[m], sigma[m], u[m], np.sum(N[pi == m]), pi_m[m], tau_a,
+                                             tau_b) - norm.logpdf(prop_logtau, logtau[m], std)
+
+                if np.isnan(log_rate):
+                    log_rate = -np.Inf
+
+                if np.isinf(exp(prop_logtau)) or np.isnan(exp(prop_logtau)):
+                    log_rate = -np.Inf
+
+                rate = min(1, np.exp(log_rate))
+
+                if np.random.random() < rate:
+                    tau[m] = exp(prop_logtau)
 
     return alpha, sigma, tau
 
@@ -208,3 +265,9 @@ def joint_logdist(pi, alpha, sigma, tau, u):
           - (alpha / sigma) * ((u + tau) ** sigma - tau ** sigma)
     tmp += np.sum(gammaln(pi - sigma) - gammaln(1. - sigma))
     return tmp
+
+
+def dirichlet_multinomial(hyper_alpha, pi, n_mixture):
+    pi_m = np.array([np.sum(pi == m) for m in range(n_mixture)])
+    return gammaln(n_mixture * hyper_alpha) + np.sum(gammaln(pi_m + hyper_alpha)) - n_mixture * gammaln(
+        hyper_alpha) - gammaln(len(pi) + hyper_alpha)

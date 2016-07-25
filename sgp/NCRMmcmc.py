@@ -24,9 +24,9 @@ def sampling_u(u, n, C, alpha, sigma, tau, n_steps=1):
 
     for i in range(n_steps):
         v = log(u)
-        var = 1. / 4.
+        var = 1.
         std = np.sqrt(var)
-        prop_v = np.random.normal(v, 1. / 4.)
+        prop_v = np.random.normal(v, std)
 
         # compute acceptance probability
         log_rate = log_density_v(prop_v, n, C, alpha, sigma, tau) + norm.logpdf(v, prop_v, std) \
@@ -34,8 +34,11 @@ def sampling_u(u, n, C, alpha, sigma, tau, n_steps=1):
 
         if np.isnan(log_rate):
             log_rate = -np.Inf
-        rate = np.exp(log_rate)
-        rate = min(1, np.exp(log_rate))
+
+        if np.isinf(exp(prop_v)):
+            log_rate = -np.Inf
+
+        rate = min(1, exp(log_rate))
 
         if np.random.random() < rate:
             v = prop_v
