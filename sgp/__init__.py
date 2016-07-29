@@ -6,4 +6,4 @@ from .BSgraphrnd import BSgraphrnd
 from .KGgraphrnd import KGgraphrnd
 from .GGPgraphmcmc import GGPgraphmcmc
 from .MixGGPgraphmcmc import MixGGPgraphmcmc
-
+from .NCRMmcmc import NGGPmcmc

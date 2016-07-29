@@ -20,7 +20,6 @@
 \begin{document}
 
 \maketitle
-
 \section{Completely Random Measure}
 A completely random measure (CRM) $\mu$ on $\mathbb{R}_+$ is a random measure such that for any countable number of disjoint measurable sets $A_1, A_2, ...$ of $\mathbb{R}_+$, the random variable $\mu(A_1), \mu(A_2), ...$ are independent and $\mu(\cup_i A_i) = \sum_i \mu(A_i)$. If one assumes that the distribution of $\mu([t,s])$ only depends on the difference $t-s$ then the CRM takes the form of $\mu = \sum_{i=1}^{\infty}w_i\delta_{\theta_i}$ where $(w_i, \theta_i)$ are the points of a Poisson point process on $\mathbb{R}_+^2$ with L\'{e}vy intensity measure $\nu(dw, d\theta) = \rho(dw)\lambda(d\theta)$\footnote{Subordinator.}. The Laplace transform of $\mu(A)$ on any measurable set $A$ has a following representation: $\mathbb{E}[e^{-t\mu(A)}] = \exp(-\int_{\mathbb{R}_+ \times A}(1-e^{-tw})\rho(dw)\lambda(d\theta))$ for any $t>0$ and $\rho$ such that $\int_{\mathbb{R}_+}(1-e^{-w})\rho(dw) < \infty$. Laplace exponent is $\psi(t) = \int_{\mathbb{R}} (1 - e^{-t w}) \rho(dw)$.
 
@@ -34,7 +33,7 @@ Z &=\sum_{i,j} \min(n_{ij} + n_{ji}, 1)\delta_{(\theta_i, \theta_j)}, \label{eqn
 \end{align}
 with intensity measure $\nu$ factorising as $\nu(dw, d\theta) = \rho(dw) \lambda(d\theta)$ for a jump part of the measure $\rho$ and Lebesgue measure $\lambda$. $D$ is simply generated from a Poisson process with a product measure as an intensity and can be interpreted as a directed multi-graph.
 Given $\mu$, we can directly specify the undirected graph $Z$ as
-\[ Pr(z_{ij}=1|w) = 
+\[ Pr(z_{ij}=1|w) =
   \begin{cases}
     1 - \exp(-2w_iw_j)       & \quad i \neq j\\
     1 - \exp(-w_i^2) & \quad i = j.\\
@@ -62,7 +61,7 @@ D &= \sum_{i,j,k} n_{ijk} \delta_{(\theta_i, \theta_j, \theta_k')}& &D \sim \tex
 Z &=\sum_{i,j,k} \min(n_{ijk}, 1)\delta_{(\theta_i, \theta_j, \theta_k')}, &&
 \end{align}
 where $Z$ is asymmetric in $i$ and $j$ since the knowledge graph is a directed multi-graph. As done in the original model, we can also specify $Z$ as
-\[ Pr(z_{ijk}=1|w, w') = 
+\[ Pr(z_{ijk}=1|w, w') =
   \begin{cases}
     1 - \exp(-w_iw_jw_k')       & \quad i \neq j\\
     1 - \exp(-w_i^2w_k') & \quad i = j.\\
@@ -74,7 +73,7 @@ If we consider $\theta_i$, $\theta_j$, and $\theta_k'$ as nodes in the graph, th
 \bar{Z} &= \sum_{i,j}\min(\bar{D}(\{\theta_i, \theta_j\}), 1) \delta_{(\theta_i,\theta_j)},
 \end{align}
 where $\bar{D}$ is a multigraph, and $\bar{Z}$ is a binary graph of a knowledge base.
-\[ Pr(\bar{z}_{ij}=1|w, w') = 
+\[ Pr(\bar{z}_{ij}=1|w, w') =
   \begin{cases}
     1 - \exp(-w_iw_j\sum_{k}w_k')       & \quad i \neq j\\
     1 - \exp(-w_i^2\sum_{k}w_k') & \quad i = j.\\
@@ -108,7 +107,7 @@ where
 \Pi_{n}^l(m_1, ..., m_l|\mu_\alpha^*) = \frac{\sigma^l \mu_\alpha^{*-n}}{\Gamma(n-l\sigma)g_{\sigma}(\mu_\alpha^*)} \int_{0}^{\mu_\alpha^*}s^{n-l\sigma-1}g_{\sigma}(\mu_\alpha^*-s)ds \bigg(\prod_{i=1}^{l} \frac{\Gamma(m_i-\sigma)}{\Gamma(1-\sigma)} \bigg),
 \end{align}
 and $g_\sigma$ is the pdf of the positive stable distribution.
-Finally, the total mass of $\mu_\alpha^*$ and ${\mu'}_\beta^{*}$ follows an exponentially tilted stable distribution where the exact sampler exists \citep{devroye2009random,hofert2011sampling}. 
+Finally, the total mass of $\mu_\alpha^*$ and ${\mu'}_\beta^{*}$ follows an exponentially tilted stable distribution where the exact sampler exists \citep{devroye2009random,hofert2011sampling}.
 
 Using this urn representation, we can rewrite the generative process as
 \begin{enumerate}
@@ -128,7 +127,7 @@ In case $\sigma=0$, $\rho(dw)$ is an intensity of the Gamma process where the su
 \subsubsection{Expected number of triples}
 From the generative process of the random graph, the number of total edge follows the poisson distribution with mean intensity $\mu^{*2}_\alpha \mu^*_\beta$.
 \begin{align}
-\mathbb{E}[D^*_{\alpha\beta}] & = \mathbb{E}[\mu^{*2}_\alpha]\mathbb{E}[\mu^*_\beta] \\ 
+\mathbb{E}[D^*_{\alpha\beta}] & = \mathbb{E}[\mu^{*2}_\alpha]\mathbb{E}[\mu^*_\beta] \\
 &= (\text{Var}(\mu^*_\alpha) + \mathbb{E}[\mu^{*}_\alpha]^2)\mathbb{E}[\mu^*_\beta]\\
 & = \frac{\alpha(\alpha+1)}{\tau} \frac{\beta}{\tau}
 \end{align}
@@ -176,7 +175,7 @@ Since $N_\alpha$ and $N_\beta$ is independent,
 %\begin{proof}
 %$\sum_{k=1}^{\infty} w_k' < \infty$ a.s. When $\mu'$ is given and the sum of $w_k'$ is finite a.s., we can use the same proof technique used in \cite{Caron2015}.
 %\end{proof}
-%What if $\mu'$ is not given? Let $(X_i)$ and $(Y_k)$ be i.i.d. real-valued random variable from $p$ and $q$, respectively, and let $h(x_1, x_2, y_1)$ be a measurable function symmetric in the first two arugments. 
+%What if $\mu'$ is not given? Let $(X_i)$ and $(Y_k)$ be i.i.d. real-valued random variable from $p$ and $q$, respectively, and let $h(x_1, x_2, y_1)$ be a measurable function symmetric in the first two arugments.
 %\begin{align}
 %\frac{2 \sum_{i<j}\sum_{k} h(X_i, X_j, Y_k)}{n_x(n_x -1) n_y} \xrightarrow[]{?} \mathbb{E}[h(X_i, X_j, Y_k)]\quad a.s.\quad as \quad n\rightarrow \infty
 %\end{align}
@@ -193,7 +192,7 @@ We first characterise the posterior of $\mu_\alpha$ given $\mu'_\beta$ and $D_{\
 
 \begin{align}
 \label{eqn:lpl_d}
-\mathbb{E}_{\mu_\alpha}[e^{-\mu_\alpha(f)}|D_{\alpha\beta}, \mu'_\beta] 
+\mathbb{E}_{\mu_\alpha}[e^{-\mu_\alpha(f)}|D_{\alpha\beta}, \mu'_\beta]
 &= \mathbb{E}_{\Pi}[e^{-\int \tilde{f}(w, \theta)\Pi(dw, d\theta)}|D_{\alpha\beta}, \mu'_\beta] \\
 &= \frac{\mathbb{E}_{\Pi}[ e^{-\Pi(\tilde{f})} P(D_{\alpha\beta}|\Pi, \mu'_\beta)]}{\mathbb{E}_{\Pi}[P(D_{\alpha\beta}|\Pi, \mu'_\beta)]}\\
 %&= \frac{\mathbb{E}_{\Pi}[e^{-\Pi(\tilde{f})} e^{-\Pi(h)^2{\mu'}_\beta^{*}} \prod_{i=1}^{N_\alpha} w_i^{m_i} \prod_{k=1}^{N_\beta} {w'_k}^{m_k} ]}{\mathbb{E}_{\Pi}[e^{-\Pi(h)^2{\mu'}_\beta^{*}} \prod_{i=1}^{N_\alpha} w_i^{m_i} \prod_{k=1}^{N_\beta} {w'_k}^{m_k} ]]}
@@ -202,16 +201,16 @@ We first characterise the posterior of $\mu_\alpha$ given $\mu'_\beta$ and $D_{\
 where $h(w, \theta) = w$ and
 \begin{align}
 P(D_{\alpha\beta}|\Pi, \mu'_\beta) & = P(D_{\alpha\beta}|\mu_\alpha, \mu'_\beta)\\
-& = \text{Poisson}(D^*_{\alpha\beta}|\mu_\alpha^{*2}{\mu'}_\beta^{*}) 
+& = \text{Poisson}(D^*_{\alpha\beta}|\mu_\alpha^{*2}{\mu'}_\beta^{*})
 \prod_{i=1}^{N_\alpha} P(n_{i**}|\mu_\alpha) \prod_{j=1}^{N_\alpha} P(n_{*j*}|\mu_\alpha)
 \prod_{k=1}^{N_\beta} P(n_{**k}|\mu_\beta) \\
 & = \frac{ (\mu_\alpha^{*2}{\mu'}_\beta^{*})^{D^*_{\alpha\beta}} e^{-\mu_\alpha^{*2}{\mu'}_\beta^{*}} }{D^*_{\alpha\beta}!}
-\prod_{i=1}^{N_\alpha} \Big( \frac{w_i}{\mu_\alpha^*} \Big)^{n_{i**}} 
-\prod_{j=1}^{N_\alpha} \Big( \frac{w_j}{\mu_\alpha^*} \Big)^{n_{*j*}} 
+\prod_{i=1}^{N_\alpha} \Big( \frac{w_i}{\mu_\alpha^*} \Big)^{n_{i**}}
+\prod_{j=1}^{N_\alpha} \Big( \frac{w_j}{\mu_\alpha^*} \Big)^{n_{*j*}}
 \prod_{k=1}^{N_\beta} \Big( \frac{w'_k}{{\mu'}_\beta^{*}} \Big)^{n_{**k}}\\
 & =\frac{e^{-\mu_\alpha^{*2}{\mu'}_\beta^{*}} }{D^*_{\alpha\beta}!}
 \prod_{i=1}^{N_\alpha} w_i^{m_i}
-\prod_{k=1}^{N_\beta} {w'_k}^{m_k} 
+\prod_{k=1}^{N_\beta} {w'_k}^{m_k}
  =\frac{e^{-\Pi(h)^2{\mu'}_\beta^{*}} }{D^*_{\alpha\beta}!}
 \prod_{i=1}^{N_\alpha} w_i^{m_i}
 \prod_{k=1}^{N_\beta} {w'_k}^{m_k}\\
@@ -240,7 +239,7 @@ p(w_1, ..., w_{N_\alpha}, w^*|D_{\alpha\beta}, \mu_\beta)&
 \end{align}
 $g^*_\alpha(w^*)$ is a density function of random variable $w^*$ of which Laplace transform is $\mathbb{E}[e^{tw^*}] = e^{\alpha\psi(t)}$. Therefore, the conditional of $\mu_\alpha$ given $D_{\alpha\beta}, \mu'_\beta$ is
 \begin{align}
-w^* \sum_{i=1}^{\infty}\tilde{P}_i\delta_{\tilde\theta_i} + \sum_{i=1}^{N_\alpha} w_i \delta_{\theta_i} 
+w^* \sum_{i=1}^{\infty}\tilde{P}_i\delta_{\tilde\theta_i} + \sum_{i=1}^{N_\alpha} w_i \delta_{\theta_i}
 \end{align}
 where $(\tilde{P})$ are distributed from a Poisson-Kingman distribution conditional on $w^*$, and the weights $w_1, ..., w_{N_\alpha}, w^*$ are jointly dependent conditional on $D_{\alpha\beta}$ and $\mu'_\beta$:
 \begin{align}

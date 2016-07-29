@@ -121,13 +121,12 @@ def MixGGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
             print('\tu     =', u, flush=True)
             print('\t# node for each mixture', [np.sum(pi == m) for m in range(n_mixture)], flush=True)
             print('\tJoint log likelihood', logdist, np.sum(logdist), flush=True)
-        # update hyperparam
-        alpha, sigma, tau = update_hyper(N, pi, alpha, sigma, tau, u, n_mixture, modelparam, mcmcparam)
 
-        # update jump size
+        # update jump size & update hyperparams
         for m in range(n_mixture):
-            J[pi == m], J_rem[m], u[m] = NGGPmcmc(np.sum(N[pi == m]), N[pi == m], alpha[m], sigma[m], tau[m], u[m],
-                                                  mcmcparam)
+            J[pi == m], J_rem[m], alpha[m], sigma[m], tau[m], u[m] = NGGPmcmc(np.sum(N[pi == m]), N[pi == m], alpha[m],
+                                                                              sigma[m], tau[m], u[m], modelparam,
+                                                                              mcmcparam)
         logJ = log(J)
 
         # update node membership
@@ -188,78 +187,6 @@ def MixGGPgraphmcmc(G, modelparam, mcmcparam, typegraph, verbose=True):
             alpha_st[ind] = alpha
             sigma_st[ind] = sigma
             tau_st[ind] = tau
-
-
-def log_density_tau(logtau, alpha, sigma, u, n, abs_pi, tau_a, tau_b):
-    return (tau_a - 1) * logtau - exp(logtau) * tau_b \
-           - (alpha / sigma) * ((u + exp(logtau)) ** sigma - exp(sigma * logtau)) \
-           - sigma * abs_pi * logtau - (n - sigma * abs_pi) * log(u + exp(logtau))
-
-
-def log_density_sigma(alpha, sigma, tau, u, abs_pi, n):
-    return -(alpha / sigma) * ((u + tau) ** sigma - tau ** sigma) - sigma * abs_pi * log(tau) \
-           - (n - sigma * abs_pi) * log(u + tau) - log(1 - sigma)
-
-
-def update_hyper(N, pi, alpha, sigma, tau, u, n_mixture, modelparam, mcmcparam):
-    pi_m = np.array([np.sum(pi == m) for m in range(n_mixture)])
-
-    for i in range(mcmcparam['hyper.MH_nb']):
-        if modelparam['estimate_alpha']:
-            alpha_a = modelparam['alpha_a']
-            alpha_b = modelparam['alpha_b']
-            for m in range(n_mixture):
-                alpha[m] = np.random.gamma(alpha_a + pi_m[m],
-                                           1. / (alpha_b + ((u[m] + tau[m]) ** sigma[m]
-                                                            - tau[m] ** sigma[m]) / sigma[m]))
-
-        if modelparam['estimate_sigma']:
-            std = np.sqrt(1. / 4.)
-            for m in range(n_mixture):
-                prop_sigma = 1 - np.random.lognormal(log(1 - sigma[m]), std)
-
-                log_rate = log_density_sigma(alpha[m], prop_sigma, tau[m], u[m], pi_m[m], np.sum(N[pi == m])) \
-                           + lognorm.logpdf(1 - sigma[m], log(1 - prop_sigma), std) \
-                           - log_density_sigma(alpha[m], sigma[m], tau[m], u[m], pi_m[m], np.sum(N[pi == m])) \
-                           - norm.logpdf(1 - prop_sigma, log(1 - sigma[m]), std)
-
-                if np.isnan(log_rate):
-                    log_rate = -np.Inf
-
-                if np.isinf(prop_sigma):
-                    log_rate = -np.Inf
-
-                rate = min(1, np.exp(log_rate))
-
-                if np.random.random() < rate:
-                    sigma[m] = prop_sigma
-
-        if modelparam['estimate_tau']:
-            tau_a = modelparam['tau_a']
-            tau_b = modelparam['tau_b']
-            std = np.sqrt(1. / 4.)
-            logtau = log(tau)
-            for m in range(n_mixture):
-                prop_logtau = np.random.normal(logtau[m], std)
-
-                # compute acceptance probability
-                log_rate = log_density_tau(prop_logtau, alpha[m], sigma[m], u[m], np.sum(N[pi == m]), pi_m[m], tau_a,
-                                           tau_b) + norm.logpdf(logtau[m], prop_logtau, std) \
-                           - log_density_tau(logtau[m], alpha[m], sigma[m], u[m], np.sum(N[pi == m]), pi_m[m], tau_a,
-                                             tau_b) - norm.logpdf(prop_logtau, logtau[m], std)
-
-                if np.isnan(log_rate):
-                    log_rate = -np.Inf
-
-                if np.isinf(exp(prop_logtau)) or np.isnan(exp(prop_logtau)):
-                    log_rate = -np.Inf
-
-                rate = min(1, np.exp(log_rate))
-
-                if np.random.random() < rate:
-                    tau[m] = exp(prop_logtau)
-
-    return alpha, sigma, tau
 
 
 def log_normalise(log_prob):
