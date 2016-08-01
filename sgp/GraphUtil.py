@@ -1,7 +1,14 @@
 import numpy as np
+import networkx as nx
 from collections import defaultdict
 from scipy.sparse import csr_matrix, csc_matrix, triu
 
+
+def sparse_to_networkx(G):
+    nnz = G.nonzero()
+    _G = nx.Graph()
+    _G.add_edges_from(zip(nnz[0], nnz[1]))
+    return _G
 
 def compute_growth_rate(G, n_repeat=10):
     """
