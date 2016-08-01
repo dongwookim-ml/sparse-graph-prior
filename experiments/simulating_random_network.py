@@ -6,21 +6,19 @@ import itertools
 import pickle
 import os
 
+import numpy as np
+
 from sgp import GGPgraphrnd, GGPmixtureGraphrnd
 
 n_samples = 10 # number of network generated from a given parameter set
 
 alphas = [100]
-# sigmas = [0, 0.25, 0.5, 0.75, 0.9]
 sigmas = [0.5]
-# taus = [0.1, 1, 5, 10]
-taus = [1]
+taus = [0.1]
 
 d_alphas = [100]
-# d_sigmas = [-0.1, -0.5, -1, -2, -5]
 d_sigmas = [-1]
-# d_taus = [0.1, 1, 5, 10]
-d_taus = [0.1, 1, 5, 10]
+d_taus = [0.1]
 
 dest = '../result/random_network/mixture/'
 if not os.path.exists(dest):

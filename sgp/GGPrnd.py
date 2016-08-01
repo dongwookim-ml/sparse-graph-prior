@@ -74,8 +74,9 @@ def GGPrnd(alpha, sigma, tau, T=0):
             Njumps = np.floor(alpha / sigma / gamma(1. - sigma) * T ** (-sigma))
         else:
             Njumps = np.floor(-alpha * np.log(T))
-        if Njumps > 1e7:
-            raise Warning("Expected number of jumps = %d" % Njumps)
+
+    if Njumps > 1e7:
+        raise Warning("Expected number of jumps = %d" % Njumps)
 
     # Adaptive thinning strategy
     N = np.zeros(int(np.ceil(Njumps + 3 * np.sqrt(Njumps))))
