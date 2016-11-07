@@ -1,0 +1,195 @@
+% !TEX TS-program = pdflatexmk
+\documentclass{article} % For LaTeX2e
+\usepackage{nips15submit_e,times}
+\usepackage{hyperref}
+\usepackage{url}
+%\documentstyle[nips14submit_09,times,art10]{article} % For LaTeX 2.09
+
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}{Example}[theorem]
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\newcommand\myeq{\stackrel{\mathclap{\tiny\mbox{d}}}{=}}
+
+\newcommand\mb{\mathbf}
+\newcommand\mc{\mathcal}
+\newcommand\bs{\boldsymbol}
+
+\title{Gaussian Process Tensor Factorisation}
+
+
+\author{
+Dongwoo Kim
+}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to \LaTeX{} to determine where to break
+% the lines. Using \AND forces a linebreak at that point. So, if \LaTeX{}
+% puts 3 of 4 authors names on the first line, and the last on the second
+% line, try using \AND instead of \And before the third author name.
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+\nipsfinalcopy % Uncomment for camera-ready version
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+This is abstract.
+\end{abstract}
+
+\section{Gaussian Process Regression}
+
+\subsection{Notations}
+We denote scalars by lower case letters (e.g. $x$), vectors by bold lower case letters (e.g. $\mb x$), matrices by upper case letters (e.g. $A$), and tensors by calligraphic upper case letters (e.g. $\mc A$). The calligraphic letters are also used for probability distributions (e.g. $\mc{N}(\mu, \sigma^2)$).
+We use $X_{ij}$ and $\mc{X}_{ijk}$ to represent the $(i,j)$ and $(i,j,k)$ entry of matrix $X$ and tensor $\mc{X}$, respectively.
+\subsection{Linear Regression to GP}
+
+From linear model to Gaussian Process (GP).
+
+Bayesian analysis of the standard linear regression model with Gaussian noise is
+\begin{equation}
+f(\mb{x}) = \mb{x}^\top \mb{w}, \quad \quad y = f(\mb{x}) + \epsilon,
+\end{equation}
+where $\mb{x} \in \mathbb{R}^p$ is the input vector, $\mb{w}$ is a vector of weights, and $y$ is the observed target value. In general, the additional noise $\epsilon$ is distributed i.i.d Gaussian distribution with zero mean and variance $\sigma^2$
+\begin{equation}
+\epsilon \sim \mc{N}(0, \sigma^2).
+\end{equation}
+
+With an additional assumption on the prior distribution over $\mb{w}$, we can fully specify the Bayesian linear regression model. We put a zero mean Gaussian prior with covariance matrix $\Sigma$ on the weights
+\begin{equation}
+\mb{w} \sim \mc{N}(\mb{0}, \Sigma).
+\end{equation}
+The joint distribution of multiple observations $\mc{D} = \{(\mb{x}_i, y_i)|i=1,...,n\}$ is
+\begin{align}
+p(\mb{y}|X, \mb{w}) = \prod_{i=1}^{n} p(y_i|\mb{x}_i, \mb{w}) = \prod_{i=1}^{n} \frac{1}{\sqrt{2\pi}\sigma}\exp(-\frac{(y_i - \mb{x}_i^\top \mb{w})^2 }{2\sigma}),
+\end{align}
+where $X \in \mathbb{R}^{n \times p}$ is a collection of vector $\bf x$, and then the posterior is
+\begin{align}
+p(\mb{w}|X, \mb{y}) = \frac{p(\mb{y}|X,\mb{w})p(\mb{w})}{p(\mb{y}|X)}.
+\end{align}
+Important properties of this linear model is its marginal and predictive distributions. First, the marginal distribution follows
+\begin{align}
+p(\mb{y}|X) & = \int p(\mb{y}, \mb{w}|X) d\mb{w} = \int p(\mb{y} | \mb{w}, X) p(\mb{w}) d\mb{w} \\
+& =  \mc{N}(\mb{y} | \mb{0}, \frac{1}{\sigma^{2}}I + X\Sigma X^\top)
+\end{align}
+If we project the input vector $x$ into feature space through a basis function $\phi$, then there exists a function $\psi$ such that kernel $\kappa(\mb{x}, \mb{x}') = \phi(\mb{x})\Sigma\phi(\mb{x}')$ can be represented by a simple dot product $\kappa(\mb{x}, \mb{x}') = \psi(\mb{x})\psi(\mb{x}')$, and this corresponds to the GP with zero mean function.
+
+\section{Gaussian Process Matrix Factorisation}
+We now consider the GP for a matrix factorisation. Given an observed matrix $X \in \mathbb{R}^{n\times m}$, suppose there are latent factor $\mb{u}_i$ for $i$-th row and $\mb{v}_j$ for $j$-th row and feature mapping $\phi$ from the factor space to the feature space. Let matrix $U \in \mathbb{R}^{n \times d}$ and $V \in \mathbb{R}^{m \times d}$ are the collection of feature representation of the latent factors. We extend the linear model to bi-linear model as follow:
+\begin{align}
+F = U^\top W V \quad X_{ij} = F_{ij} + \epsilon, 
+\end{align}
+where weight matrix $W$ models the interaction between two latent factors $U_i$ and $V_j$, and again $\epsilon$ represents an independent zero-mean Gaussian noise with variance $\sigma^2$. We put a zero mean matrix-normal prior on the weight
+\begin{align}
+W \sim \mc{N}_{n\times m}(\mb{0}, \Sigma_{1}, \Sigma_{2})
+\end{align}
+or equivalently
+\begin{align}
+\text{vec}(W) \sim \mc{N}(\mb{0}, \Sigma_{1} \otimes \Sigma_{2}).
+\end{align}
+The marginal distribution of $F$ given $U$ and $V$ without noise $\epsilon$ is
+\begin{align}
+p(F|U,V) & = \int p(F|U,V,W)p(W) dW \\
+& =  \mc{N}(\text{vec}(F)|\mb{0}, (U\otimes V)(\Sigma_{1} \otimes \Sigma_{2})(U\otimes V)^\top)\\
+& =  \mc{N}(\text{vec}(F)|\mb{0}, (U \Sigma_{1} U^\top) \otimes (V \Sigma_{2} V^\top) )\\
+& =  \mc{N}_{n\times m}(F|\mb{0}, (U \Sigma_{1} U^\top), (V \Sigma_{2} V^\top) ) \label{eqn:matrix_gp},
+\end{align}
+which is again a matrix normal distribution.
+If we simplify the covariance matrices and use identity matrices, then the bilinear model corresponds to the GP model with a product kernel, each of which has a simple dot product representation. One could define a kernel function between latent factors directly instead. For example, in \cite{Lloyd2013}, they use an exponential squared euclidean distance between two entries $(i,j)$ and $(i',j')$ (RBF),
+\begin{align}
+\kappa((U_i, V_j), (U_{i'}, V_{j'})) = s^2 \exp\bigg(-\frac{(U_i - U_{i'})^2 + (V_j - V_{j'})^2}{2\ell^2}\bigg),
+\end{align}
+as a kernel function to model a random graph structure.
+
+\section{Gaussian Process Tensor Factorisation}
+We generalise the matrix case to $K$-mode tensor $\mc{Y} \in \mathbb{R}^{n_1 \times n_2 \times ... \times n_k}$. The Tucker family of tensor decomposition methods factorise the observed tensor into the latent space
+\begin{align}
+\mc{Y} = \mc{W} \times_{k=1}^{K} U^{(k)}
+\end{align}
+where $\mc{W} \in \mathbb{R}^{d_1 \times d_2 \times ... \times d_K}$ is a core tensor, and $U^{(k)} \in \mathbb{R}^{n_{k} \times d_k}$ is the $k$ latent factor matrix. For the prior of the core tensor $\mc{W}$, we assume that every entry of the tensor is independent, and the tensor follows a zero-mean tensor-variate normal distribution
+\begin{align}
+\mc{W} \sim \mc{TN}_{n_1 \times n_2 \times ... \times n_k}(\mb{0}, \{\Sigma^{(k)}\}_{k=1}^{K})
+\end{align}
+which is equivalent to
+\begin{align}
+\text{vec}(\mc{W}) \sim \mc{N}(\mb{0}, \otimes_{k=1}^{K} \Sigma^{(k)}).
+\end{align}
+We also assume independent Gaussian noise for each entry of tensor $\mc{Y}$ as follow:
+\begin{align}
+p(y_{i_1i_2...i_k}|\mc{W}, \{U^{(k)}\}_{k=1}^{K}) = \mc{N}(y_{i_1i_2...i_k}|\sum_{r_k=1}^{d_K}...\sum_{r_2=1}^{d_2}\sum_{r_1=1}^{d_1} w_{r_{1}r_{2}...r_{k}} U^{(1)}_{i_1r_1}U^{(2)}_{i_2r_2}...U^{(k)}_{i_kr_k}, \sigma^2)
+\end{align}
+Again, we can marginalise the core tensor $\mc{W}$ via Gaussian identity
+\begin{align}
+p(\mc{Y}|\{U^{(k)}\}_{k=1}^{K}, \{\Sigma^{(k)}\}_{k=1}^{K}) & = \mc{N}(\text{vec}(\mc{Y})| \mb{0}, \otimes_{k=1}^{K}U^{k} \otimes_{k=1}^{K}\Sigma^{(k)} {\otimes_{k=1}^{K}U^{k}}^\top) \\
+& = \mc{TN}_{n_1 \times n_2 \times ... \times n_k}(\mc{Y}| \mb{0}, \{U^{(k)}\Sigma^{(k)}{U^{(k)}}^\top \}_{k=1}^{K})
+\end{align}
+This generalise the matrix case in Equation \ref{eqn:matrix_gp} to the tensor case.
+
+\appendix
+\section{Conditional and Marginal Gaussian}
+Given a joint distribution Gaussian distribution $\mc{N}(\mb{x}|\bs{\mu}, \bs{\Sigma})$ where
+\begin{align}
+\mb{x} =
+ \begin{pmatrix}
+  \mb{x}_{a} \\
+  \mb{x}_{b}
+ \end{pmatrix},
+\quad
+\bs{\mu} = 
+ \begin{pmatrix} 
+  \bs{\mu}_{a} \\
+  \bs{\mu}_{b}
+ \end{pmatrix},
+\quad
+\bs{\Sigma} = 
+ \begin{pmatrix}
+  \bs{\Sigma}_{aa} & \bs{\Sigma}_{ab} \\
+  \bs{\Sigma}_{ba} & \bs{\Sigma}_{bb}
+ \end{pmatrix},
+\end{align}
+the conditional distribution of $\mb{x}_a$ given partial observations $\mb{x}_b$ follows
+\begin{align}
+p(\mb{x}_a|\mb{x}_b) = \mc{N}(\mb{x}_a|\bs{\mu}_{a|b}, \bs{\Sigma}_{a|b}),
+\end{align}
+where
+\begin{align}
+\bs{\mu}_{a|b} &= \bs\mu_{a} - \bs\Sigma_{ab}\bs\Sigma_{bb}^{-1}(\mb{x}_b - \bs{\mu}_b) \\
+\bs{\Sigma}_{a|b} &= \bs\Sigma_{aa} - \bs\Sigma_{ab}\bs\Sigma_{bb}^{-1}\bs\Sigma_{ba}.
+\end{align}
+
+The marginal distribution of $\mb{x}_a$ is given by
+\begin{align}
+p(\mb{x}_a) = \mathcal{N}(\mb{x}_a|\bs\mu_a,\bs\Sigma_{aa}).
+\end{align}
+
+\section{Bayes' theorem for Gaussian variables}
+Let $p(\mb{x}) = \mc{N}(\bs\mu, \Lambda^{-1})$ and $p(\mb{y}|\mb{x}) = \mc{N}(\mb{y}|A\mb{x} + \mb{b}, L^{-1})$ where $\mb{x}$ and $\mb{y}$ are both gaussian distributed and $\mb{x}$ is a prior of $\mb{y}$. The marginal distribution of $\mb{y}$ is given by
+\begin{align}
+p(\mb{y}) = \mc{N}(\mb{y}|A\bs\mu + \mb b, L^{-1} + A\Lambda^{-1}A^\top),
+\end{align}
+and the conditional of $\mb{x}$ given $\mb{y}$ is given by
+\begin{align}
+p(\mb{x}|\mb{y}) = \mc{N}(\mb{x}|\Sigma(A^\top L(\mb y - \mb b) + \Lambda \bs\mu), \Sigma),
+\end{align}
+where $\Sigma = (\Lambda + A^\top L A)^{-1}$.
+
+\bibliographystyle{apalike}
+\bibliography{ref}
+
+\end{document}
