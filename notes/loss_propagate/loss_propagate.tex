@@ -1,0 +1,78 @@
+% !TEX TS-program = pdflatexmk
+\documentclass{article} % For LaTeX2e
+\usepackage{nips15submit_e,times}
+\usepackage{hyperref}
+\usepackage{url}
+%\documentstyle[nips14submit_09,times,art10]{article} % For LaTeX 2.09
+
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}{Example}[theorem]
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\newcommand\myeq{\stackrel{\mathclap{\tiny\mbox{d}}}{=}}
+
+\newcommand\mb{\mathbf}
+\newcommand\mc{\mathcal}
+\newcommand\bs{\boldsymbol}
+
+\title{Knowledge Graph Construction with External Task }
+
+
+\author{
+Dongwoo Kim
+}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to \LaTeX{} to determine where to break
+% the lines. Using \AND forces a linebreak at that point. So, if \LaTeX{}
+% puts 3 of 4 authors names on the first line, and the last on the second
+% line, try using \AND instead of \And before the third author name.
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+\nipsfinalcopy % Uncomment for camera-ready version
+
+\begin{document}
+
+\maketitle
+
+%\begin{abstract}
+%\end{abstract}
+
+\section{Knowledge Graph Construction with External Task}
+
+Many active learning algorithms for knowledge graph construction only focus on obtaining as many positive triples as possible. This is not a crazy idea, however, it does not agree with a practical usage of knowledge graphs. For example, a content provider may want to use the knowledge graph to recommend items that fit to user's preference. This could be achieved by considering the similarity between different items in the knowledge graph based on a history of a user. If the active knowledge graph construction does not care the performance of following tasks, it may end up to discover some facts that do not lead any improvement in recommendation. Therefore, `good' active construction algorithms should reflect the following usages of the knowledge graph.
+
+A recent study \cite{Zhang2016} examines how a knowledge graph can be used for a movie recommendation. Their approach resembles a co-factorisation where two different loss functions for user-movie matrix and knowledge graph tensor are used to estimate the latent embeddings of movies and users.
+Let $u_i \in \mathbb{R}^p$ be a latent embedding of user $i$, $e_j \in \mathbb{R}^p$ be a latent embedding of entity $j$, and $R_k \in \mathbb{R}^{p\times p}$ be a latent embedding of relation $k$. $X \in \mathcal{X}^{U \times E}$ is a user-movie rating matrix, and $\mathcal{G} \in [0,1]^{E\times K\times E}$ is a tensor-represented knowledge graph. The goal of co-factorisation is to minimise the following loss
+\begin{align}
+L_{X, \mathcal{G}}(U, E, R) & = L_X(U, E) + \lambda L_\mathcal{G}(E, R)\\
+& = \sum_{ij \in X}\ell_X(X_{ij}, u_{i}^\top e_{j}) + \lambda \sum_{jj'k \in \mathcal{G}}\ell_G(\mathcal{G}_{jj'k}, e_j^\top R_k e_{j'}).
+\end{align}
+A squared error is typically used as a loss for the matrix factorisation. We may consider the recommendation as a binary classification problem. In this case, we can choose an appropriate loss $\ell_X$ to optimise.  We often measure the performance of these problems using AUC to take into account an imbalanced distribution of labels. In this case, it would be preferable to directly optimise AUC on a training set, or in practice, optimise a surrogate loss. However, the current objective optimise both losses for recommendation and knowledge graph construction, which is not an optimal choice.
+
+One way to back propagate the loss of the classification is to design nested objectives. One possible candidate is
+\begin{align}
+L_{X, \mathcal{G}}(U) & = L_X(U) + \Omega(U)\\
+& = \sum_{ij \in X}\ell(X_{ij}, u_{i}^\top f_j(\mathcal{G}))
+\end{align}
+where $f_j$ extract $p$-dimensional feature of entity $j$ from the entire knowledge graph $\mathcal{G}$. Two questions are naturally occurring from here: 1) How to extract feature of entity $j$ from the entire knowledge graph? 2) How does the back-propagated loss help to construct a KG?
+
+
+\bibliographystyle{apalike}
+\bibliography{ref}
+
+\end{document}
