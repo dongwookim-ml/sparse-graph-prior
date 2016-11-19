@@ -59,18 +59,22 @@ Many active learning algorithms for knowledge graph construction only focus on o
 A recent study \cite{Zhang2016} examines how a knowledge graph can be used for a movie recommendation. Their approach resembles a co-factorisation where two different loss functions for user-movie matrix and knowledge graph tensor are used to estimate the latent embeddings of movies and users.
 Let $u_i \in \mathbb{R}^p$ be a latent embedding of user $i$, $e_j \in \mathbb{R}^p$ be a latent embedding of entity $j$, and $R_k \in \mathbb{R}^{p\times p}$ be a latent embedding of relation $k$. $X \in \mathcal{X}^{U \times E}$ is a user-movie rating matrix, and $\mathcal{G} \in [0,1]^{E\times K\times E}$ is a tensor-represented knowledge graph. The goal of co-factorisation is to minimise the following loss
 \begin{align}
-L_{X, \mathcal{G}}(U, E, R) & = L_X(U, E) + \lambda L_\mathcal{G}(E, R)\\
-& = \sum_{ij \in X}\ell_X(X_{ij}, u_{i}^\top e_{j}) + \lambda \sum_{jj'k \in \mathcal{G}}\ell_G(\mathcal{G}_{jj'k}, e_j^\top R_k e_{j'}).
+L_{X, \mathcal{G}}(\mathbf{u}, \mathbf{e}, R) & = L_X(\mathbf{u}, \mathbf{e}) + \lambda L_\mathcal{G}(\mathbf{e}, R)\\
+& = \sum_{ij \in X}\ell_X(X_{ij}, u_{i}^\top e_{j}) + \lambda \sum_{jj'k \in \mathcal{G}}\ell_G(\mathcal{G}_{jj'k}, e_j^\top R_k e_{j'}). \label{eqn:two_losses}
 \end{align}
 A squared error is typically used as a loss for the matrix factorisation. We may consider the recommendation as a binary classification problem. In this case, we can choose an appropriate loss $\ell_X$ to optimise.  We often measure the performance of these problems using AUC to take into account an imbalanced distribution of labels. In this case, it would be preferable to directly optimise AUC on a training set, or in practice, optimise a surrogate loss. However, the current objective optimise both losses for recommendation and knowledge graph construction, which is not an optimal choice.
 
 One way to back propagate the loss of the classification is to design nested objectives. One possible candidate is
 \begin{align}
-L_{X, \mathcal{G}}(U) & = L_X(U) + \Omega(U)\\
-& = \sum_{ij \in X}\ell(X_{ij}, u_{i}^\top f_j(\mathcal{G}))
+L_{X, \mathcal{G}}(\mathbf{u}) & = \sum_{ij \in X}\ell(X_{ij}, u_{i}^\top f_j(\mathcal{G}))
 \end{align}
 where $f_j$ extract $p$-dimensional feature of entity $j$ from the entire knowledge graph $\mathcal{G}$. Two questions are naturally occurring from here: 1) How to extract feature of entity $j$ from the entire knowledge graph? 2) How does the back-propagated loss help to construct a KG?
 
+How to model feature function of an entity? The feature function $f_j$ should reflect some local (or global) structure of the knowledge graph.  Let $\mathcal{T}_j$ be a set of triples that contain entity $j$. We \textbf{may} also use the bilinear structure to model features as follow:
+\begin{align}
+f_j(\mathcal{G}) = \frac{1}{|\mathcal{T}_j|} ( \sum_{jj'k} R_k e_{j'} + \sum_{j'jk}R_k^\top e_{j'} ).
+\end{align}
+To compare with the second loss in Equation \ref{eqn:two_losses}, we only took the structure of knowledge graph (which entities are connected from entity $j$ through which relations) to model the feature function.
 
 \bibliographystyle{apalike}
 \bibliography{ref}
