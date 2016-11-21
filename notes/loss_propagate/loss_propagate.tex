@@ -74,7 +74,10 @@ How to model feature function of an entity? The feature function $f_j$ should re
 \begin{align}
 f_j(\mathcal{G}) = \frac{1}{|\mathcal{T}_j|} ( \sum_{jj'k} R_k e_{j'} + \sum_{j'jk}R_k^\top e_{j'} ).
 \end{align}
-To compare with the second loss in Equation \ref{eqn:two_losses}, we only took the structure of knowledge graph (which entities are connected from entity $j$ through which relations) to model the feature function.
+To compare with the second loss in Equation \ref{eqn:two_losses}, we only took the structure of knowledge graph (which entities are connected to/from entity $j$ through which relations) to model the feature function.
+
+\textbf{Does the domain adaptation or transfer learning help?} The domain adaptation often provides a systematic way to transfer knowledge from one domain to the other domain. For example, a model trained on a set of synthesised images with varying font styles is used to identify a house-number on street-view dataset with the domain adaptation \cite{Ganin2015}. In domain adaptation, each dataset comes from different source, but all datasets share the same task i.e. input distribution $p(X)$ changes between different datasets, but label distribution $p(Y|X)$ remains the same. In our case, the domain adaptation does not fit well because we tackle to solve two separate tasks: knowledge graph completion and recommendation. The transfer learning might be more appropriate in this case. The assumption behind transfer learning is that the input distribution $p(X)$ remains the same but the label distribution $p(Y|X)$ changes between different datasets, and typically, it is assumed that we have one data set that is labeled for both problems. The difference between our problem and general transfer learning problems is that the data are i.i.d. distributed in general transfer learning, but our data is not i.i.d. distributed and can be represented by multiple relations. Markov logic networks have been used to tackle the transfer learning problem in relational datasets. For example, \cite{Mihalkova2007} try to find mapping between relations from two different knowledge graphs via mapping two Markov logic networks.
+
 
 \bibliographystyle{apalike}
 \bibliography{ref}

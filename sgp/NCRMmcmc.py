@@ -120,7 +120,7 @@ def sampling_u(u, n, C, alpha, sigma, tau, n_steps=1):
     return u, rate
 
 
-def NGGPmcmc(n, pi, alpha, sigma, tau, u, modelparam, mcmcparam, verbose=False):
+def NGGPmcmc(n, pi, alpha, sigma, tau, u, modelparam, mcmcparam, verbose=False, isinfinite=True):
     """
     Sampling posterior distribution of the underlying GGP given observations from NGGP
 
@@ -142,23 +142,29 @@ def NGGPmcmc(n, pi, alpha, sigma, tau, u, modelparam, mcmcparam, verbose=False):
     C = pi.size
     J = np.zeros(C)
 
-    for i in range(mcmcparam['j.niter']):
-        for m in range(C):
+    if isinfinite:
+        for i in range(mcmcparam['j.niter']):
+            for m in range(C):
+                u, rate = sampling_u(u, n, C, alpha, sigma, tau, mcmcparam['u.MH_nb'])
+                scale = 1. / (u + tau)
+                if scale < 1e-100:
+                    J[m] = np.random.gamma(pi[m] - sigma, 1e-100)
+                else:
+                    J[m] = np.random.gamma(pi[m] - sigma, scale)
+
             u, rate = sampling_u(u, n, C, alpha, sigma, tau, mcmcparam['u.MH_nb'])
-            scale = 1. / (u + tau)
-            if scale < 1e-100:
-                J[m] = np.random.gamma(pi[m] - sigma, 1e-100)
-            else:
-                J[m] = np.random.gamma(pi[m] - sigma, scale)
 
-        u, rate = sampling_u(u, n, C, alpha, sigma, tau, mcmcparam['u.MH_nb'])
+            J_rem = GGPsumrnd(alpha, sigma, u + tau)
 
-        J_rem = GGPsumrnd(alpha, sigma, u + tau)
+            for j in range(mcmcparam['hyper.MH_nb']):
+                alpha, sigma, tau = update_hyper(n, pi, alpha, sigma, tau, u, modelparam, mcmcparam)
 
-        for j in range(mcmcparam['hyper.MH_nb']):
-            alpha, sigma, tau = update_hyper(n, pi, alpha, sigma, tau, u, modelparam, mcmcparam)
+            if verbose:
+                print("%d: %.2f\t%.2f\t%.2f\t%.2f" % (i, alpha, sigma, tau, u))
 
-        if verbose:
-            print("%d: %.2f\t%.2f\t%.2f\t%.2f" % (i, alpha, sigma, tau, u))
+    else:
+        for i in range(mcmcparam['j.niter']):
+            for m in range(C):
+                scale = 1. / tau
 
     return J, J_rem, alpha, sigma, tau, u
