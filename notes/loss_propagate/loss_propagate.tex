@@ -27,7 +27,6 @@
 
 \title{Knowledge Graph Construction with External Task}
 
-
 \author{
 Dongwoo Kim
 }
@@ -51,16 +50,17 @@ Dongwoo Kim
 
 %\begin{abstract}
 %\end{abstract}
+\section{Notation}
 
 \section{Knowledge Graph Construction with External Task}
 
 Many active learning algorithms for knowledge graph construction only focus on obtaining as many positive triples as possible. This is not a crazy idea, however, it does not agree with a practical usage of knowledge graphs. For example, a content provider may want to use the knowledge graph to recommend items that fit to user's preference. This could be achieved by considering the similarity between different items in the knowledge graph based on a history of a user. If the active knowledge graph construction does not care the performance of following tasks, it may end up to discover some facts that do not lead any improvement in recommendation. Therefore, `good' active construction algorithms should reflect the following usages of the knowledge graph.
 
 A recent study \cite{Zhang2016} examines how a knowledge graph can be used for a movie recommendation. Their approach resembles a co-factorisation where two different loss functions for user-movie matrix and knowledge graph tensor are used to estimate the latent embeddings of movies and users.
-Let $u_i \in \mathbb{R}^p$ be a latent embedding of user $i$, $v_j, v_l \in \mathbb{R}^p$ be a latent embedding of entity $j$ and $l$, and $R_k \in \mathbb{R}^{p\times p}$ be a latent embedding of relation $k$. $X \in \mathcal{X}^{U \times E}$, where $U$ is a number of users and $E$ is a number of entities, is a user-movie rating matrix, and $\mathcal{G} \in \{0,1\}^{E\times E \times K}$, where $K$ is a number of relations, is a tensor-represented knowledge graph. We use $g_{jlk}$ to denote the value of triple $t=\{j, l, k\}$. The goal of co-factorisation is to minimise the following loss
+Let $\bs{u}_i \in \mathbb{R}^d$ be a latent embedding of user $i$, $\bs{v}_j, \bs{v}_l \in \mathbb{R}^d$ be a latent embedding of entity $j$ and $l$, and $R_k \in \mathbb{R}^{d\times d}$ be a latent embedding of relation $k$. $X \in \mathcal{X}^{U \times E}$, where $U$ is a number of users and $E$ is a number of entities, is a user-movie rating matrix, and $\mathcal{G} \in \{0,1\}^{E\times E \times K}$, where $K$ is a number of relations, is a tensor-represented knowledge graph. We use $g_{jlk}$ to denote the value of triple $t=(j, l, k)$. The goal of co-factorisation is to minimise the following loss
 \begin{align}
 L_{X, \mathcal{G}}(\mathbf{u}, \mathbf{v}, R) & = L_X(\mathbf{u}, \mathbf{v}) + \lambda L_\mathcal{G}(\mathbf{v}, R)\\
-& = \sum_{ij}\ell_X(x_{ij}, u_{i}^\top v_j) + \lambda \sum_{jlk}\ell_\mathcal{G}(g_{jlk}, v_j^\top R_k v_{l}), \label{eqn:two_losses}
+& = \sum_{ij}\ell_X(x_{ij}, \bs{u}_{i}^\top \bs{v}_j) + \lambda \sum_{jlk}\ell_\mathcal{G}(g_{jlk}, \bs{v}_j^\top R_k \bs{v}_{l}), \label{eqn:two_losses}
 \end{align}
 where we use standard bilinear model to score each triple given latent variables.
 A squared error is typically used as a loss for the matrix factorisation. We may consider the recommendation as a binary classification problem. In this case, we can choose an appropriate loss $\ell_X$ to optimise.  We often measure the performance of these problems using AUC to take into account an imbalanced distribution of labels. In this case, it would be preferable to directly optimise AUC on a training set, or in practice, optimise a surrogate loss. However, the current objective optimise both losses for recommendation and knowledge graph construction, which is not an optimal choice.
@@ -68,43 +68,66 @@ A squared error is typically used as a loss for the matrix factorisation. We may
 One way to back propagate the loss of the classification is to design nested objectives. One possible candidate is
 \begin{align}
 \label{eqn:obj}
-L_{X, \mathcal{G}}(\mathbf{u}) & = \sum_{ij}\ell(x_{ij}, u_{i}^\top f_j(\mathcal{G}))
+L_{X, \mathcal{G}}(\mathbf{u}) & = \sum_{ij}\ell(x_{ij}, \bs{u}_{i}^\top \bs{f}_j(\mathcal{G}))
 \end{align}
-where $f_j$ extracts $p$-dimensional feature of entity $j$ from the entire knowledge graph $\mathcal{G}$. Two questions are naturally occurring from here: 1) How to extract feature of entity $j$ from the entire knowledge graph? 2) How does the back-propagated loss help to construct a KG?
+where $\bs{f}_j$ extracts $d$-dimensional feature of entity $j$ from the entire knowledge graph $\mathcal{G}$. Two questions are naturally occurring from here: 1) How to extract feature of entity $j$ from the entire knowledge graph? 2) How does the back-propagated loss help to construct a KG? Before answering these questions, let's derive the partial derivative of the objective. If we use the squared loss, the derivative w.r.t. function $\bs{f}_j$ has a form
+\begin{align}
+\frac{\partial L_{X, \mathcal{G}}}{\partial \bs{f}_j} = \sum_{i}(x_{ij} - \bs{u}_i^\top \bs{f}_j) \bs{u}_i.
+\end{align}
 
 How to model feature function of an entity? The feature function $f_j$ should reflect some local (or global) structure of the knowledge graph.  Let $\mathcal{T}_j$ be a set of triples that contain entity $j$. We \textbf{may} also use the bilinear structure to model features as follow:
 \begin{align}
 \label{eqn:feature_fn}
-f_j(\mathcal{G}) = \frac{1}{|\mathcal{T}_j|} ( \sum_{lk} R_k v_{l} + \sum_{lk}R_k^\top v_{l} ).
+\bs{f}_j(\mathcal{G}) = \frac{1}{|\mathcal{T}_j|} ( \sum_{l,k:(j,k,l) \in \mathcal{T}_j} R_k \bs{v}_{l} g_{jkl} + \sum_{l,k:(l,k,j) \in \mathcal{T}_j}R_k^\top \bs{v}_{l} g_{lkj} ).
 \end{align}
+This feature function is derived from a bilinear assumption. In the bilinear model, the ultimate goal is to infer entity vectors and relation matrices which satisfy the following equation
+\begin{align}
+x_{jkl} = \bs{v}_j ^\top R_k \bs{v}_l,
+\end{align}
+where we have used $\bs{v}_j = x_{jkl} R_k \bs{v}_l$.
 To compare with the second loss in Equation \ref{eqn:two_losses}, we only took the structure of knowledge graph (which entities are connected to/from entity $j$ through which relations) to model the feature function. $e$ and $R$ in Equation \ref{eqn:feature_fn} are not estimated based on some loss w.r.t. the knowledge graph. Therefore, it should not be used to reconstruct or predict the knowledge graph.
+\begin{align}
+\frac{\partial f_{jd}}{\partial\bs{v}_l} = 
+\end{align}
 
 \textbf{Which triple should be queried next?} Our goal is to minimise the empirical loss in Equation \ref{eqn:obj}. Therefore, next triple $t$ should be chosen to minimise the expected loss
 \begin{align}
-\arg\min_t \mathbb{E}_{g_t}\bigg[\sum_{ij}\ell(x_{ij}, u_{i}^\top  f_j(\mathcal{G} \cup t))\bigg],
+\arg\min_t \mathbb{E}_{g_t}\bigg[\sum_{ij}\ell(x_{ij}, \bs{u}_{i}^\top  \bs{f}_j(\mathcal{G} \cup t))\bigg],
 \end{align}
 or maximise the expected gain
 \begin{align}
-\arg\max_t \sum_{ij}\ell(x_{ij}, u_{i}^\top  f_j(\mathcal{G})) - \mathbb{E}_{g_t}\bigg[\sum_{ij}\ell(x_{ij}, u_{i}^\top  f_j(\mathcal{G} \cup t))\bigg],
+\arg\max_t \sum_{ij}\ell(x_{ij}, \bs{u}_{i}^\top  \bs{f}_j(\mathcal{G})) - \mathbb{E}_{g_t}\bigg[\sum_{ij}\ell(x_{ij}, \bs{u}_{i}^\top  \bs{f}_j(\mathcal{G} \cup t))\bigg],
 \end{align}
 where we take an expectation over the possible value of triple i.e. $g_t \in \{0, 1\}$. Again, this requires some model that estimates the probability of triple such as \textsc{prescal}.
 
 \subsection{Statistical relational models}
 The original \textsc{Rescal} paper uses squared error loss to optimise the latent embeddings. Below we list some alternative losses and its derivative w.r.t. the latent variables.
 
+\textbf{Negative log logistic loss}:
 A total loss of the \textsc{Rescal} can be decomposed into a sum of individual loss
 \begin{align}
-L_\mathcal{G}(\mathbf{v}, \mathbf{R}) = \sum_{jkl} l(g_{jlk}, v_j^\top R_k v_l).
+L_\mathcal{G}(\mathbf{v}, \mathbf{R}) = \sum_{jkl} \ell_\sigma(g_{jlk}, \bs{v}_j^\top R_k \bs{v}_l).
 \end{align}
 If the individual loss is the negative logarithm of the logistic loss, the function can be written
 \begin{align}
-\ell(g_{jlk}, v_j^\top R_k v_l) = - \bigg\{g_{jlk} \log \sigma(v_j^\top R_k v_l) + (1- g_{jlk}) \log (1- \sigma(v_j^\top R_k v_l))\bigg\},
+\ell_\sigma(g_{jlk}, \bs{v}_j^\top R_k \bs{v}_l) = - \bigg\{g_{jlk} \log \sigma(\bs{v}_j^\top R_k \bs{v}_l) + (1- g_{jlk}) \log (1- \sigma(\bs{v}_j^\top R_k \bs{v}_l))\bigg\},
 \end{align}
-and the derivative of the total loss w.r.t the entity vector $v_j$ is
+and the derivative of the total loss w.r.t the entity vector $\bs{v}_j$ is
 \begin{align}
-\frac{\partial L_\mathcal{G}}{\partial v_j} =  \sum_{lk}\bigg[\Big\{\sigma(v_j^\top R_k v_l) - g_{jlk}\Big\} R_k v_l + \Big\{\sigma(v_l^\top R_k v_j) - g_{ljk}\Big\} R_k^\top v_l \bigg],
+\frac{\partial L_\mathcal{G}}{\partial \bs{v}_j} =  \sum_{lk}\bigg[\Big\{\sigma(\bs{v}_j^\top R_k \bs{v}_l) - g_{jlk}\Big\} R_k \bs{v}_l + \Big\{\sigma(\bs{v}_l^\top R_k \bs{v}_j) - g_{ljk}\Big\} R_k^\top \bs{v}_l \bigg],
 \end{align}
 where we consider both direction from/to entity $j$.
+
+\textbf{Surrogate AUC loss (hinge loss)}
+Let $\mathcal{T}^{(p)}$ be a set of positive triples and $\mathcal{T}^{(n)}$ be a set of negative triples.
+\begin{align}
+L_\mathcal{G}(\mathbf{v}, \mathbf{R}) = \sum_{(j_p,k_p,l_p) \in \mathcal{T}^{(p)}}\sum_{(j_n, k_n, l_n) \in \mathcal{T}^{(n)}} \ell_+(\bs{v}_{j_p}^\top R_{k_p} \bs{v}_{l_p}, \bs{v}_{j_n}^\top R_{k_n} \bs{v}_{l_n}),
+\end{align}
+where $\ell_+(x, y) = y - x$ if $y - x \geq 0$ else 0. Let $\mathcal{T}_+^{(p,n)}$ be a set of pairs of triples whose hinge loss is greater than 0. Taking the derivative of the hinge loss w.r.t. $v_j$ is
+\begin{align}
+\frac{\partial L_\mathcal{G}}{\partial \bs{v}_j} = - \sum_{(t_p, t_n) \in \mathcal{T}_+^{(p,n)} : j_p = j} R_{k_p}\bs{v}_{l_p} - \sum_{t_p, t_n: l_p = j} R_{k_p}^\top \bs{v}_{j_p} + \sum_{t_p, t_n: j_n = j} R_{k_n}\bs{v}_{l_n}  + \sum_{t_p, t_n: l_n = j} R_{k_n}^\top \bs{v}_{j_n}
+\end{align}
+
 
 
 %\textsc{TransE}
