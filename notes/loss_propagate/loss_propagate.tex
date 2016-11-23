@@ -78,18 +78,20 @@ where $\bs{f}_j$ extracts $d$-dimensional feature of entity $j$ from the entire 
 How to model feature function of an entity? The feature function $f_j$ should reflect some local (or global) structure of the knowledge graph.  Let $\mathcal{T}_j$ be a set of triples that contain entity $j$. We \textbf{may} also use the bilinear structure to model features as follow:
 \begin{align}
 \label{eqn:feature_fn}
-\bs{f}_j(\mathcal{G}) = \frac{1}{|\mathcal{T}_j|} ( \sum_{l,k:(j,k,l) \in \mathcal{T}_j} R_k \bs{v}_{l} g_{jkl} + \sum_{l,k:(l,k,j) \in \mathcal{T}_j}R_k^\top \bs{v}_{l} g_{lkj} ).
+\bs{f}_j(\mathcal{G}) = \frac{1}{|\mathcal{T}_j|} \bigg( \sum_{l,k:(j,k,l) \in \mathcal{T}_j} R_k \bs{v}_{l} g_{jkl} + \sum_{l,k:(l,k,j) \in \mathcal{T}_j}R_k^\top \bs{v}_{l} g_{lkj} \bigg).
 \end{align}
 This feature function is derived from a bilinear assumption. In the bilinear model, the ultimate goal is to infer entity vectors and relation matrices which satisfy the following equation
 \begin{align}
-x_{jkl} = \bs{v}_j ^\top R_k \bs{v}_l,
+g_{jkl} = \bs{v}_j ^\top R_k \bs{v}_l,
 \end{align}
-where we have used $\bs{v}_j = x_{jkl} R_k \bs{v}_l$.
-To compare with the second loss in Equation \ref{eqn:two_losses}, we only took the structure of knowledge graph (which entities are connected to/from entity $j$ through which relations) to model the feature function. $e$ and $R$ in Equation \ref{eqn:feature_fn} are not estimated based on some loss w.r.t. the knowledge graph. Therefore, it should not be used to reconstruct or predict the knowledge graph.
+where we have used $\bs{v}_j = g_{jkl} R_k \bs{v}_l$ and let $\bs{f}_j$ be an average of these vectors across all possible triples which contain entity $j$.
 \begin{align}
-\frac{\partial f_{jd}}{\partial\bs{v}_l} = 
+\frac{\partial f_{jd}}{\partial\bs{v}_l} = \frac{|\mathcal{T}_{jl}|}{|\mathcal{T}_j|} \bigg( \sum R_k g_{jkl} + \sum R_k^\top g_{lkj} \bigg)
 \end{align}
 
+To compare with the second loss in Equation \ref{eqn:two_losses}, we only took the structure of knowledge graph (which entities are connected from/to entity $j$ through which relations) to model the feature function. $e$ and $R$ in Equation \ref{eqn:feature_fn} are not estimated based on some loss w.r.t. the knowledge graph.
+
+\subsection{Active learning}
 \textbf{Which triple should be queried next?} Our goal is to minimise the empirical loss in Equation \ref{eqn:obj}. Therefore, next triple $t$ should be chosen to minimise the expected loss
 \begin{align}
 \arg\min_t \mathbb{E}_{g_t}\bigg[\sum_{ij}\ell(x_{ij}, \bs{u}_{i}^\top  \bs{f}_j(\mathcal{G} \cup t))\bigg],
@@ -100,7 +102,7 @@ or maximise the expected gain
 \end{align}
 where we take an expectation over the possible value of triple i.e. $g_t \in \{0, 1\}$. Again, this requires some model that estimates the probability of triple such as \textsc{prescal}.
 
-\subsection{Statistical relational models}
+\section*{Statistical relational models}
 The original \textsc{Rescal} paper uses squared error loss to optimise the latent embeddings. Below we list some alternative losses and its derivative w.r.t. the latent variables.
 
 \textbf{Negative log logistic loss}:
