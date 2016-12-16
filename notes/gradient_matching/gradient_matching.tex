@@ -1,0 +1,142 @@
+% !TEX TS-program = pdflatexmk
+\documentclass{article} % For LaTeX2e
+\usepackage{nips15submit_e,times}
+\usepackage{hyperref}
+\usepackage{url}
+%\documentstyle[nips14submit_09,times,art10]{article} % For LaTeX 2.09
+
+\usepackage{amsthm}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+
+\usepackage{algpseudocode,algorithm,algorithmicx}  
+
+\newtheorem{theorem}{Theorem}
+\newtheorem{corollary}{Corollary}[theorem]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{example}{Example}[theorem]
+
+\theoremstyle{definition}
+\newtheorem{definition}{Definition}
+
+\newcommand\myeq{\stackrel{\mathclap{\tiny\mbox{d}}}{=}}
+
+\newcommand\mc{\mathcal} %calligraphic
+\newcommand\ts{\mathcal} %tensor
+\newcommand\mt{} %matrix
+\newcommand\vt{\mathbf} %vector
+\newcommand\fn{} %function
+\newcommand\triple[3]{(#1 \stackrel{#2}\rightarrow #3)}
+%\newcommand\triple[3]{(#1, #2, #3)}
+
+\title{Multiple Matrices Factorisation\\ via Matching Gradients}
+
+\author{
+Dongwoo Kim
+}
+
+% The \author macro works with any number of authors. There are two commands
+% used to separate the names and addresses of multiple authors: \And and \AND.
+%
+% Using \And between authors leaves it to \LaTeX{} to determine where to break
+% the lines. Using \AND forces a linebreak at that point. So, if \LaTeX{}
+% puts 3 of 4 authors names on the first line, and the last on the second
+% line, try using \AND instead of \And before the third author name.
+
+\newcommand{\fix}{\marginpar{FIX}}
+\newcommand{\new}{\marginpar{NEW}}
+
+\nipsfinalcopy % Uncomment for camera-ready version
+
+\begin{document}
+
+\maketitle
+
+%\begin{abstract}
+%\end{abstract}
+
+\section{Joint matrix factorisation}
+Let $X \in \mathbb{R}^{n \times m_X}$ and $Y \in \mathbb{R}^{n \times m_Y}$ be two matrices where the first dimension represents the same object, i.e. user-rating matrix $X$ and user-attribute matrix $Y$. A typical collaborative filtering approach to predict the unknown entry of the first matrix is to factorise the matrix into a low-rank representation $X \approx f(UV^\top)$ where $U\in\mathbb{R}^{n\times k}$, $V\in \mathbb{R}^{m_X \times k}$ and $f:\mathbb{R}^{n \times m_X} \rightarrow \mathbb{R} ^{n \times m_X}$ is a link function. Joint (or co-) factorisation approach tries to factorise two related matrices into some shared low-rank representations in hope that there is a common latent representation shared across different domains. For example, $X$ and $Y$ can be factorised into $X \approx UV^\top$ and $Y \approx UW^\top$ where $W \in \mathbb{R}^{m_Y \times k}$ with the identity link function. Therefore, both matrices share the same latent representation $U$ on the first dimension. More formally, the joint factorisation approach attempts to minimise the following objective:
+\begin{equation}
+\label{eqn:joint_obj}
+L_{XY}(X,Y,U,V,W) = L_X(X, UV^\top) + \lambda L_Y(Y, UW^\top),
+\end{equation}
+where $L_X$ and $L_Y$ are appropriate loss functions for matrix $X$ and $Y$, and $\lambda$ controls the relative importance of $Y$ with respect to $X$. Various gradient based algorithms are developed to minimise the objective function.
+
+\subsection{Gradient Matching}
+What I and Lexing initially thought about gradient matching is that we match the direction of gradient w.r.t $U$ on both side of losses $L_X$ and $L_Y$, so that the both side of losses are reduced together in the same direction. In the worse case without matching gradients, two gradients could be cancelled out, which makes convergence slow. Formally, we want to ensure that the two gradients are similar during the optimisation
+\begin{align}
+\frac{\partial L_X}{\partial U_i} \stackrel{\angle}{\approx} \frac{\partial L_Y}{\partial U_i},
+\end{align}
+where $\stackrel{\angle}{\approx}$ represents the similarity between angles of two vectors. Given $X$,$Y$,$V$ and $W$, however, there is no way to match these two gradients because the gradients are decided once the other quantities and losses are fixed (btw, this is why I said it's impossible). Having said that, it might be possible to adjust another quantities such as $V$ and/or $W$ in order to match these gradients. If we think about SVD, there are no unique solution for $U$ and $V$ except the singular values, therefore it might be possible to find the new $W$ that reduces the divergence in gradients while preserving the approximation $Y \approx UW^\top$ relatively the same or reduced further. Let's assume that we adjust $W$ to match the gradients, then the optimal(?)  $W^*$ would be the solution of the following objective for some positive $\epsilon$:
+\begin{align}
+\label{eqn:matching_obj}
+\arg\min_{W^*}L_{\angle}(\frac{\partial L_X}{\partial U_i}, \frac{\partial L_Y(W^*)}{\partial U_i}) \leq \epsilon \quad \text{subject to} \quad L_Y(Y, UW^{*\top}) \leq L_Y(Y, UW_{\text{old}}^\top)
+\end{align}
+where $L_{\angle}$ measures the difference between two vectors, i.e. ($1 - \frac{1}{2}(\text{cosine similarity}+1)$), and $W_{\text{old}}$ is the previously estimated matrix. Or we could relax the constraint and minimise the following objective to find $W^*$:
+\begin{align}
+L_{\angle Y}(W^*) = \lambda_\angle L_{\angle}(\frac{\partial L_X}{\partial U_i}, \frac{\partial L_Y(W^*)}{\partial U_i}) + |L_Y(Y, UW^{*\top}) - L_Y(Y, UW_{\text{old}}^\top)|_{+},
+\end{align}
+where $\lambda_\angle$ represents the relative importance of the angle difference, and $|x|_+ = \max(x, 0)$ in order to ensure that the reconstruction loss will not increase. Algorithm \ref{alg:jmfgm} summarises the gradient matching approach. We first compute the gradients of $U$ and then find an optimal $W^*$ that matches the gradients. After we update $U$ and repeat this process until converge.
+
+\subsection{Discussion}
+
+\begin{itemize}
+\item Can we proof that the matching gradients approach leads to a better solution? or converge?
+\item How can we find $W^*$ in Equation \ref{eqn:matching_obj}?
+\item What if we cannot find $W^*$ in Equation \ref{eqn:matching_obj}? Do we stop the optimisation?
+\item Would it be better to jointly optimising $W^*$ and $V^*$ together while matching gradients?
+\item How can we generalise this framework to incorporate a tensor?
+\end{itemize}
+
+\begin{algorithm}  
+  \caption{Joint Matrix Factorisation via Matching Gradients \label{alg:jmfgm}}
+  \begin{algorithmic}
+  	\Require{$X \in \mathbb{R}^{n \times m_X}$, $Y \in \mathbb{R}^{n \times m_Y}$, $L_X$, $L_Y$, $L_\angle$}
+    \Statex
+    \Function{MatchingGradient}{$U, V, W$}
+    \State Randomly initialise $U, V, W$
+    \For{$t \gets 1 \textrm{ to } T$} 
+      \For{$i \gets 1 \textrm{ to } n$} 
+      	\State Compute gradient of ${\partial L_X}/{\partial U_i}$ and ${\partial L_Y}/{\partial U_i}$
+        \While{$L_{\angle}({\partial L_X}/{\partial U_i}, {\partial L_Y}/{\partial U_i}) \leq \epsilon$}
+        	\State update $W$ from Equation \ref{eqn:matching_obj}
+        \EndWhile
+        \State update $U_i = U_i - \gamma_t \nabla_{U_i} L_{XY}$
+        \State update $V_i = V_i - \gamma_t \nabla_{V_i} L_{XY}$        
+      \EndFor  
+    \EndFor
+      \State \Return{$U$, $V$, $W$}
+    \EndFunction
+  \end{algorithmic}  
+\end{algorithm}
+
+\begin{algorithm}
+\end{algorithm}
+
+\section{Concrete Example}
+Let us examine the framework with more concrete example. For every matrix reconstruction loss we use squared Frobenious norm, and for the angle loss we use $1 - \frac{1}{2}(\text{cosine similarity}+1)$ between two vectors.
+
+\begin{align}
+L_{XY}(X,Y,U,V,W) =& L_X(X, UV^\top) + \lambda L_Y(Y, UW^\top)\\
+=& \sum_{ij} \frac{1}{2} (X_{ij} - U_i^\top V_j)^2 + \lambda \sum_{ij} \frac{1}{2} (Y_{ij} - U_i^\top W_j)^2
+\end{align}
+Take the gradient with respect to $U_i$
+\begin{align}
+\frac{\partial L_X(X, UV^\top)}{\partial U_i} &= -\sum_j^{m_X} V_j(X_{ij} - U_i^\top V_j)\\
+&= - V^\top(X_i - VU_i)\\
+\frac{\partial L_Y(Y, UW^\top)}{\partial U_i} &= -\sum_j^{m_Y} W_j(Y_{ij} - U_i^\top W_j)\\
+&= - W^\top(Y_i - WU_i)
+\end{align}
+Cosine similarity between two gradient vectors can be computed as follow 
+\begin{align}
+\frac{(X_i - VU_i)^\top V W^\top(Y_i - WU_i)}{||V^\top(X_i - VU_i)||\cdot||W^\top(Y_i - WU_i)||}
+\end{align}
+
+
+
+%\bibliographystyle{apalike}
+%\bibliography{ref}
+
+\end{document}
