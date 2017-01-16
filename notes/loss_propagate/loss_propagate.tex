@@ -61,24 +61,40 @@ We denote vectors by bold lower case letter, e.g. $\vt{a}$, matrices by bold upp
 
 Many active learning algorithms for knowledge graph construction only focus on obtaining as many positive triples as possible. This is not a crazy idea, however, it does not agree with a practical usage of knowledge graphs. For example, a content provider may want to use the knowledge graph to recommend items that fit to user's preference. This could be achieved by considering the similarity between different items in the knowledge graph based on a history of a user. If the active knowledge graph construction does not care the performance of following tasks, it may end up to discover some facts that do not lead any improvement in recommendation. Therefore, `good' active construction algorithms should reflect the following usages of the knowledge graph.
 
+\subsection{General Framework}
+A score function $s_\mt{X}: \mathbb{M} \rightarrow \mathbb{R}_+$.
+$s_\mt{X}: \mathbb{T} \rightarrow \mathbb{R}_+$
+
+\begin{align}
+L_{\mt{X},\ts{G}} = L_\mt{X}(s_\mt{X}) + L_\ts{G}(s_\ts{G})
+\end{align}
+Assume that both loss function shares some parameter $\vt{v}_j$ for each entity $j$
+
+
+\subsection{Co-factorisation}
+
 A recent study \cite{Zhang2016} examines how a knowledge graph can be used for a movie recommendation. Their approach resembles a co-factorisation where two different loss functions for user-movie matrix and knowledge graph tensor are used to estimate the latent embeddings of movies and users.
 Let $\vt{u}_i \in \mathbb{R}^d$ be a latent embedding of user $i$, $\vt{v}_j, \vt{v}_l \in \mathbb{R}^d$ be a latent embedding of entity $j$ and $l$, and $\mt{R}_{k} \in \mathbb{R}^{d\times d}$ be a latent embedding of relation $k$. $X \in \mc{X}^{U \times E}$, where $U$ is a number of users and $E$ is a number of entities, is a user-movie rating matrix, and $\ts{G} \in \{0,1\}^{E\times E \times K}$, where $K$ is a number of relations, is a tensor-represented knowledge graph. We use $g_{jlk}$ to denote the value of triple $t=\triple{j}{k}{l}$. The goal of co-factorisation is to minimise the following loss
 \begin{align}
+\label{eqn:two_losses}
 L_{X, \ts{G}}(\mt{U}, \mt{V}, \ts{R}) & = L_X(\mt{U}, \mt{V}) + \lambda L_\ts{G}(\mt{V}, \ts{R})\\
 & = \sum_{ij}\ell_X(x_{ij}, \vt{u}_{i}^\top \vt{v}_j) + \lambda \sum_{jlk}\ell_\ts{G}(g_{jlk}, \vt{v}_j^\top \mt{R}_{k} \vt{v}_{l}), \label{eqn:two_losses}
 \end{align}
 where we use standard bilinear model to score each triple given latent variables.
-A squared error is typically used as a loss for the matrix factorisation. We may consider the recommendation as a binary classification problem. In this case, we can choose an appropriate loss $\ell_X$ to optimise.  We often measure the performance of these problems using AUC to take into account an imbalanced distribution of labels. In this case, it would be preferable to directly optimise AUC on a training set, or in practice, optimise a surrogate loss. However, the current objective optimise both losses for recommendation and knowledge graph construction, which may not be an optimal choice.
-
-One way to back propagate the loss of the classification is to design nested objectives. One possible candidate is
+A squared error is typically used as a loss for the matrix factorisation. We may consider the recommendation as a binary classification problem. In this case, we can choose an appropriate loss $\ell_X$ to optimise.  We often measure the performance of these problems using AUC to take into account an imbalanced distribution of labels. In this case, it would be preferable to directly optimise AUC on a training set, or in practice, optimise a surrogate loss. However, the current objective optimise both losses for recommendation and knowledge graph construction, which may not be an optimal choice. In other words, we want to optimise the first term in RHS of Equation \ref{eqn:two_losses} instead of optimising both terms while considering the structure of a knowledge graph.
+One way to achieve this goal is to design a nested objective function. One possible candidate is
 \begin{align}
 \label{eqn:obj}
 L_{X, \ts{G}}(\mt{U}) & = \sum_{ij}\ell(x_{ij}, \vt{u}_{i}^\top \fn{f}_j(\ts{G}))
 \end{align}
-where feature function $\fn{f}_j : \{0,1\}^{E\times E\times K} \rightarrow \mathbb{R}^d$ extracts $d$-dimensional feature of entity $j$ from the entire knowledge graph $\ts{G}$. Two questions are naturally occurring from here: 1) How to extract feature of entity $j$ from the entire knowledge graph? 2) How does the back-propagated loss help to construct a KG? Before answering these questions, let's derive the partial derivative of the objective. If we use the squared loss, the derivative w.r.t. function $\fn{f}_j$ has a form
-\begin{align}
-\frac{\partial L_{X, \ts{G}}}{\partial \fn{f}_j} = \sum_{i}(x_{ij} - \vt{u}_i^\top \fn{f}_j) \vt{u}_i.
-\end{align}
+where feature function $\fn{f}_j : \{0,1\}^{E\times E\times K} \rightarrow \mathbb{R}^d$ extracts $d$-dimensional feature of entity $j$ from the entire knowledge graph $\ts{G}$. Two questions are naturally occurring from here: 1) How to extract feature of entity $j$ from the entire knowledge graph? 2) How does the back-propagated loss help to construct a KG? 
+%Before answering these questions, let's derive the partial derivative of the objective. If we use the squared loss, the derivative w.r.t. function $\fn{f}_j$ has a form
+%\begin{align}
+%\frac{\partial L_{X, \ts{G}}}{\partial \fn{f}_j} = -\sum_{i}(x_{ij} - \vt{u}_i^\top \fn{f}_j) \vt{u}_i.
+%\end{align}
+There might be several ways to design a feature function $f$. However, instead of designing a feature function from scratch, it would be better to incorporate some ideas of existing statistical relational models since the goal of these models are highly focused on how to infer latent semantics of entities and relations. More specifically, if we can match the function $f_j$ to the latent representation of entity $j$ of some statistical model, then the Equation \ref{eqn:obj} will naturally encompass both the statistical relational model and recommendation problem.
+
+Alternatively, we can use the co-factorisation objective in Equation \ref{eqn:two_losses}. One problem of combining two datasets in a single objective is that an optimal loss may be different across different datasets. For example, if we cast the recommendation problem as a classification problem, then it would be preferable to learn a pair-wise scorer between positive and negative data points based on the hinge loss.
 
 %How to model feature function of an entity? The feature function $\fn{f}_j$ should reflect some local (or global) structure of the knowledge graph.  Let $\mc{T}_j$ be a set of triples that contain entity $j$. We may also use the bilinear structure to model features as follow:
 %\begin{align}
@@ -107,6 +123,7 @@ or maximise the expected gain
 where we take an expectation over the possible value of triple i.e. $g_t \in \{0, 1\}$. Again, this requires some model that estimates the probability of triple such as \textsc{prescal}.
 
 \section*{Statistical relational models}
+\subsection*{RESCAL}
 The original \textsc{Rescal} paper uses squared error loss to optimise the latent embeddings. Below we list some alternative losses and its derivative w.r.t. the latent variables.
 
 \textbf{Negative log logistic loss}:
@@ -137,12 +154,29 @@ where $\ell_+(x, y) = y - x$ if $y - x \geq 0$ else 0. Let $\mc{T}_+^{(p,n)}$ be
 \end{align}
 The derivative remains the same even if we put some additional margin on the loss.
 
+\subsection*{TranseE}
+\textsc{TransE} model assumes that every entity can be represented by a linear function of relation and other entity in each triple.
+\begin{align}
+\vt{v}_j =  \vt{v}_l -\vt{r}_k \quad \forall \triple{j}{k}{l},
+\end{align}
+where both entities and relations are represented by length-$d$ vector unlike \textsc{Rescal}.
+Since above equations are overdetermined system in general, the goal of \textsc{TransE} is to minimise the sum of squared distance between $\vt{v}_j$ and $\vt{v}_l -\vt{r}_k$:
+\begin{align}
+L_\ts{G}(\mt{V}, \mt{R}) = \sum_{\triple{j}{k}{l}}|\vt{v}_j + \vt{r}_k - \vt{v}_l|^2
+\end{align}
 
-%\textsc{TransE}
-%\begin{align}
-%-|v_j + r_k - v_l|
-%\end{align}
+\section{}
 
+\begin{align}
+&\mathbb{D}_{\phi}(\mt{X}, \hat{X}) + \sum_k \mathbb{D}_{\phi}(\mt{G}_k, \hat{G}_k)\\
+=&\mathbb{D}_{\phi}(\mt{X}, \mt{U}\mt{V}^\top) + \sum_k \mathbb{D}_{\phi}(\mt{G}_k, \mt{V}\mt{R}_k\mt{V}^\top)\\
+=& \sum_{ij} d_\phi(x_{ij}, \vt{u}_i^\top \vt{v}_j) + \sum_{\triple{j}{k}{l}} d_\phi(g_{jkl}, \vt{v}_j^\top R_k \vt{v}_l)\\
+=& \sum_{ij} \phi(x_{ij}) - \phi(\vt{u}_i^\top \vt{v}_j) - \langle x_{ij}, \vt{u}_i^\top \vt{v}_j \rangle \nabla\phi(\vt{u}_i^\top \vt{v}_j) \\
+&+ \sum_{\triple{j}{k}{l}} \phi(g_{jkl}) - \phi(\vt{v}_j^\top R_k \vt{v}_l) - \langle g_{jkl}, \vt{v}_j^\top R_k \vt{v}_l \rangle \nabla\phi(\vt{v}_j^\top R_k \vt{v}_l)\\
+=& \sum_{ij} \phi(x_{ij}) + \phi^\star(\hat{x}_{ij}^\star) - \langle x_{ij}, \hat{x}_{ij}^\star \rangle \\
+&+ \sum_{\triple{j}{k}{l}} \phi(g_{jkl}) + \phi^\star(\hat{g}_{jkl}^\star) - \langle g_{jkl}, \hat{g}_{jkl}^\star\rangle ,
+\end{align}
+where $\phi^\star$ is a conjugate of $\phi$, and $\hat{x}^\star = (\nabla \phi)^{-1}(\hat{x})$ is related to $\hat{x}$ by the Legendre transformation.
 
 \section{Does the domain adaptation or transfer learning help?}
 The domain adaptation often provides a systematic way to transfer knowledge from one domain to the other domain. For example, a model trained on a set of synthesised images with varying font styles is used to identify a house-number on street-view dataset with the domain adaptation \cite{Ganin2015}. In domain adaptation, each dataset comes from different source, but all datasets share the same task i.e. input distribution $p(X)$ changes between different datasets, but label distribution $p(Y|X)$ remains the same. In our case, the domain adaptation does not fit well because we tackle to solve two separate tasks: knowledge graph completion and recommendation. The transfer learning might be more appropriate in this case. The assumption behind transfer learning is that the input distribution $p(X)$ remains the same but the label distribution $p(Y|X)$ changes between different datasets, and typically, it is assumed that we have one data set that is labeled for both problems. The difference between our problem and general transfer learning problems is that the data are i.i.d. distributed in general transfer learning, but our data is not i.i.d. distributed and can be represented by multiple relations. Markov logic networks have been used to tackle the transfer learning problem in relational datasets. For example, \cite{Mihalkova2007} try to find mapping between relations from two different knowledge graphs via mapping two Markov logic networks. The MLN approach only works for homogeneous datasets does not suit in our case.
