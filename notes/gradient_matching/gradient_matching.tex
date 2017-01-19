@@ -55,29 +55,6 @@ Dongwoo Kim
 
 %\begin{abstract}
 %\end{abstract}
-\section{Single Matrix Completion}
-The goal of matrix completion is to recover a data matrix from a small set of observations on its entires. Suppose we wish to recover a matrix $X \in \mathbb{R}^{n_1 \times n_2}$ of rank $r$. Let $\Omega$ be a set of indices of observed entries of $X$, i.e. $(i,j) \in \Omega$ if $X_{ij}$ is observed. The noiseless case was first studied by \cite{candes2009exact} where a nuclear norm minimisation as a surrogate to the rank minimisation
-\begin{align}
-\text{minimise}&\quad ||\bar{X}||^* \\
-\text{subject to}&\quad \bar{X}_{ij} = X_{ij}\quad (i,j) \in \Omega 
-\end{align}
-perfectly recovers the original matrix with very high probability if the number of sampled entires $m$ obeys $m\geq \mathcal{O}(n^{1.2}r \log n)$. A tighter analysis of the same convex relaxation was developed in \cite{candes2010power} ($m \geq \mathcal{O}(n r \log n)$). More practical settings, where the few observed entries are corrupted by noise, has been extensively studied recently \cite{candes2010matrix,keshavan2010matrix,negahban2012restricted,klopp2014noisy,lafond2015low}. These studies show that when the distribution on noise is additive and sub-exponential, then the prediction error with the nuclear norm minimisation satisfies with high probability
-\begin{equation}
-\frac{||\bar{X} - X||^2_{F}}{n_1 n_2} = \mathcal{O}\bigg(
-\frac{(n_1+n_2) \text{rank}(X) \log (n_1 + n_2)}{m}
-\bigg),
-\end{equation}
-where $||\cdot||_F$ denotes the Frobenius norm, and $X\in\mathbb{R}^{n_1 \times n_2}$.
-
-\section{Error Bound of Joint Matrix Completion}
-Let $X \in \mathbb{R}^{n_1 \times n_2}$ and $Y \in \mathbb{R}^{n_1 \times n_3}$ be two matrices where the first dimension represents the same object, i.e. user-rating matrix $X$ and user-attribute matrix $Y$. When the number of observed entries of matrix $X$ is less than the number of observations that can be used to complete the rest of the unobserved entries, one widely used heuristic method is to jointly factorise both $X$ and $Y$ with the hope that the both matrices share some common low-rank structure on its first dimension. This approach may sound plausible, but there is not theoretical guarantee so far.
-If the low-rank representations are the same, then we can apply the standard theories on the combined matrix $[X, Y] \in \mathbb{R}^{n_1 \times (n_2 + n_3)}$. However, this is not the case, under which conditions we can apply joint optimisation for reconstructing $X$ and what would be the error bound of the estimate? Following questions might be of interest to solve this problem.
-\begin{itemize}
-\item What are the corresponding optimiser of the nuclear norm optimiser for the joint factorisation?
-\item What structural assumptions should be made to link two matrices? for example, a certain similarity assumption between two singular value vectors or two low-rank representations? 
-\item Noise / noiseless assumptions. which noise model?
-\item Sampling distribution. uniform? non-uniform?
-\end{itemize}
 
 \section{Joint Matrix Factorisation}
 Let $X \in \mathbb{R}^{n_1 \times n_2}$ and $Y \in \mathbb{R}^{n_1 \times n_3}$ be two matrices where the first dimension represents the same object, i.e. user-rating matrix $X$ and user-attribute matrix $Y$. A typical collaborative filtering approach to predict the unknown entry of the first matrix is to factorise the matrix into a low-rank representation $X \approx f(UV^\top)$ where $U\in\mathbb{R}^{n_1\times k}$, $V\in \mathbb{R}^{n_2 \times k}$ and $f:\mathbb{R}^{n_1 \times n_2} \rightarrow \mathbb{R} ^{n_1 \times n_2}$ is a link function. Joint (or co-) factorisation approach tries to factorise two related matrices into some shared low-rank representations in hope that there is a common latent representation shared across different domains. For example, $X$ and $Y$ can be factorised into $X \approx UV^\top$ and $Y \approx UW^\top$ where $W \in \mathbb{R}^{n_3 \times k}$ with the identity link function. Therefore, both matrices share the same latent representation $U$ on the first dimension.
