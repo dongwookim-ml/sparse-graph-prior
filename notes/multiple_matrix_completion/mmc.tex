@@ -19,7 +19,8 @@
 
 \theoremstyle{definition}
 \newtheorem{definition}{Definition}
-\newtheorem{assumption}{Assumption}
+\newtheorem{assumption}{A}
+\newtheorem{question}{Q}
 
 \newcommand\myeq{\stackrel{\mathclap{\tiny\mbox{d}}}{=}}
 
@@ -54,8 +55,10 @@ Dongwoo Kim
 
 \maketitle
 
-%\begin{abstract}
-%\end{abstract}
+\begin{abstract}
+Low-rank or approximately low-rank matrix approximation is a popular method to complete a matrix given partial observation of its entry. As the seminar work by \cite{candes2009exact} pointed out, one can recover the original matrix without error given an a certain number of samples with high probability. In practice, when the number of observations is not satisfying this criteria, one widely used heuristic to overcome the shortage of samples is to jointly completing multiple matrices that shares some parts of their dimensions. For example, to get a reliable estimator of user-movie rating matrix, one may use movie-actor matrix as additional information to get more information about movies. In this work, we would like to identify when and how this joint completion would work and why.
+\end{abstract}
+
 \section{Preliminary}
 Assume that unknown rank-$r$ matrix $X$ is $n_1 \times n_2$. The goal of single matrix completion is to recover original matrix $X$ from partially observed entries. The singular value decomposition (SVD) is
 \begin{equation}
@@ -108,7 +111,7 @@ Under the assumption 1 and 2, a nuclear norm minimisation
 \end{align}
 perfectly recovers the original matrix with high probability if the number of uniformly sampled entires $m$ obey $m\geq \mathcal{O}(\max(\mu_1^2,\mu_0^{1/2},\mu_1,\mu_0n^{1/4}) n r \beta \log n)$ for some $\beta > 2$.
 \end{theorem}
-Later, a tighter analysis of the same convex relaxation was developed in \cite{candes2010power} ($m \geq \mathcal{O}(n r \log n)$). More practical settings, where the few observed entries are corrupted by noise, has been extensively studied recently \cite{candes2010matrix,keshavan2010matrix,negahban2012restricted,klopp2014noisy,lafond2015low}. These studies show that when the distribution on noise is additive and sub-exponential, then the prediction error with the nuclear norm minimiser $\hat{X}$ satisfies with high probability
+Later, a tighter analysis of the same convex relaxation was developed in \cite{candes2010power,recht2011simpler}. More practical settings, where the few observed entries are corrupted by noise, has been extensively studied recently \cite{candes2010matrix,keshavan2010matrix,negahban2012restricted,klopp2014noisy,lafond2015low}. These studies show that when the distribution on noise is additive and sub-exponential, then the prediction error with the nuclear norm minimiser $\hat{X}$ satisfies with high probability
 \begin{equation}
 \frac{||\hat{X} - X||^2_{F}}{n_1 n_2} = \mathcal{O}\bigg(
 \frac{(n_1+n_2) \text{rank}(X) \log (n_1 + n_2)}{m}
@@ -122,15 +125,25 @@ Let $X \in \mathbb{R}^{n_1 \times n_2}$ and $Y \in \mathbb{R}^{n_1 \times n_3}$ 
 One of our main question is how many samples are required to perfectly recover the original matrices $X$ and $Y$ under what assumptions. More precisely, an interesting question might be the number of observation $m_X$ of matrix $X$ needed to recover the matrix $X$ given the number of observation $m_Y$ of matrix $Y$ or vice versa. Often, it is more easier to obtain the entries of $Y$ instead of those in $X$, therefore, understanding the nature of joint completion will provide some guidelines to the joint completion approach. We start from an assumption to make the analysis feasible.
 
 \begin{assumption}\label{assume:share}
-Let SVD of $X = \sum_{i=1}^{r_X} \sigma_i^{(X)} u_i^{(X)} v_i^\top$ and $Y = \sum_{i=1}^{r_Y} \sigma_i^{(Y)} u_i^{(Y)} w_i^\top$. We assume that the rank of two matrices are the same, i.e., $r_X = r_Y = r$, and the singular vector $u_i^{(X)}$ and $u_i^{(Y)}$ are the same in order to share the common low-rank structure between two matrices.
+Let SVD of $X = \sum_{i=1}^{r_X} \sigma_i^{(X)} u_i^{(X)} v_i^\top$ and $Y = \sum_{i=1}^{r_Y} \sigma_i^{(Y)} u_i^{(Y)} w_i^\top$. We assume that the rank of two matrices are the same, i.e., $r_X = r_Y = r$, and the singular vector $u_i^{(X)}$ and $u_i^{(Y)}$ are the same in order to share the common low-rank structure between two matrices\footnote{Remark: most of existing knowledge graph factorisation models such as RESCAL follow this assumption if we consider each relation as a matrix (a knowledge graph is a collection of matrices).}.
 \end{assumption}
 
 Let $Z = [X, Y] \in \mathbb{R}^{n_1 \times (n_2+n_3)}$ be the horizontally combined matrix of $X$ and $Y$. The SVD of $Z$ is $\sum_{i=1}^{r}\sigma_i u_i v_i^\top$ where $v_i^\top = [v_i^{(X)\top}, v_i^{(Y)\top}]$ is the stacked right singular vectors of $X$ and $Y$. If both singular vectors satisfy the incoherence assumptions, the joint matrix completion problem is reduced to the single matrix completion problem with different sampling rates between the first $n_2$ columns and the rightmost $n_3$ columns of combined matrix. Some of the previous studies focus on a non-uniform sampling distribution of matrix \cite{foygel2011learning,lounici2011optimal,negahban2012restricted,klopp2014noisy}. For example, popular movies are more likely to be rated by many users in a collaborative filtering. This will lead to different sampling distributions between different columns (rows). 
 
 Our problem is a special case of the sampling distribution where we sample $m_X$ samples from leftmost $n_2$ columns and $m_Y$ from rightmost $n_3$ columns.
 
-\subsection{Lower bound on $m_X$}
-Assume that we have fully observed matrix $Y$. How many samples do we need from $X$ to perfectly recover the original matrix?
+\begin{question}[Lower bound on $m_X$]
+Assume that we have fully observed matrix $Y$. How many samples do we need from $X$ to perfectly recover matrix $X$?
+\end{question}
+
+\begin{question}[$m_X$ given $m_Y$]
+Given $m_Y$ uniformly sampled entries of matrix $Y$, how many samples do we need from $X$ to perfectly recover matrix $X$? More practically, what will be the relation between the reconstruction error on $X$ and the sample size $m_X$ and $m_Y$.
+\end{question}
+
+\begin{question}[Active learning on $Y$ to recover $X$]
+In many cases, it easy more easy to obtain entries of $Y$ instead of $X$. The question is which entry of $Y$ would be actively sampled to improve a reconstruction performance of $X$.
+\end{question}
+
 
 %If the low-rank representations are the same, then we can apply the standard theories on the combined matrix $[X, Y] \in \mathbb{R}^{n_1 \times (n_2 + n_3)}$. However, this is not the case, under which conditions we can apply joint optimisation for reconstructing $X$ and what would be the error bound of the estimate? Following questions might be of interest to solve this problem.
 %\begin{itemize}
