@@ -9,16 +9,23 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{mathtools}
+\usepackage{thmtools}
 
 \usepackage{algpseudocode,algorithm,algorithmicx}  
 
-\newtheorem{theorem}{Theorem}
-\newtheorem{corollary}{Corollary}[theorem]
-\newtheorem{lemma}[theorem]{Lemma}
-\newtheorem{example}{Example}[theorem]
+%\newtheorem{theorem}{Theorem}
+%\newtheorem{corollary}{Corollary}[theorem]
+%\newtheorem{lemma}[theorem]{Lemma}
+%\newtheorem{example}{Example}[theorem]
 
-\theoremstyle{definition}
-\newtheorem{definition}{Definition}
+%\theoremstyle{definition}
+\declaretheorem[style=definition,qed=$\blacksquare$]{definition}
+\declaretheorem[style=definition,qed=$\blacktriangle$,sibling=definition]{example}
+
+\declaretheorem[style=plain,qed=$\lhd$,sibling=definition]{theorem}
+\declaretheorem[style=plain,qed=$\blacktriangle$,sibling=definition]{lemma}
+
+%\newtheorem{definition}{Definition}
 \newtheorem{assumption}{A}
 \newtheorem{question}{Q}
 
@@ -60,92 +67,159 @@ Low-rank or approximately low-rank matrix approximation is a popular method to c
 \end{abstract}
 
 \section{Preliminary}
-Assume that unknown rank-$r$ matrix $X$ is $n_1 \times n_2$. The goal of single matrix completion is to recover original matrix $X$ from partially observed entries. The singular value decomposition (SVD) is
+Assume that unknown rank-$r$ matrix $M$ is $m_1 \times m_2$. The goal of single matrix completion is to recover original matrix $M$ from partially observed entries. The singular value decomposition (SVD) is
 \begin{equation}
-X = \sum_{i=1}^{r}\sigma_i u_i v_i^\top,
+M = \sum_{i=1}^{r}\sigma_i u_i v_i^\top,
 \end{equation}
-where $\sigma_i,...,\sigma_r \geq 0$ are the singular values, and $u_1,...,u_r$ and $v_1,...,v_r$ are two sets of orthonormal singular vectors. The degree of freedom of this matrix is $(n_1+n_2)r - r^2$, which means we cannot recover the original matrix if less than $(n_1+n_2)r - r^2$ entries are available.  
+where $\sigma_i,...,\sigma_r \geq 0$ are the singular values, and $u_1,...,u_r$ and $v_1,...,v_r$ are two sets of orthonormal singular vectors. The degree of freedom of this matrix is $(m_1+m_2)r - r^2$, which means we cannot recover the original matrix if less than $(m_1+m_2)r - r^2$ entries are available.  
 
-Let $\Omega_X$ be a set of indices of observed entries, i.e. $(i,j) \in \Omega_X$ if $X_{ij}$ is observed, and $\mc{P}_{\Omega}: \mathbb{R}^{n_1\times n_2} \rightarrow \mathbb{R}^{n_1\times n_2}$ be the orthogonal projection onto index set $\Omega$ which vanishes outside of $\Omega$; that is $\bar{X} = \mc{P}_{\Omega}(X)$ is defined as
+Let $\Omega_M$ be a set of indices of observed entries, i.e. $(i,j) \in \Omega_M$ if $M_{ij}$ is observed, and $\mc{P}_{\Omega}: \mathbb{R}^{m_1\times m_2} \rightarrow \mathbb{R}^{m_1\times m_2}$ be the orthogonal projection onto index set $\Omega$ which vanishes outside of $\Omega$; that is $\bar{M} = \mc{P}_{\Omega}(M)$ is defined as
 \begin{equation}
-\bar{X}_{ij} = \left\{
+\bar{M}_{ij} = \left\{
   \begin{array}{lr}
-    X_{ij}, & (i,j) \in \Omega\\
+    M_{ij}, & (i,j) \in \Omega\\
     0, & \text{otherwise}.
   \end{array}
 \right.
 \end{equation}
 
-The spectral norm of matrix $X$ is denoted by
+The spectral norm of matrix $M$ is denoted by
 \begin{equation}
-||X|| := \sup_{u\in \mathbb{R}^n:||u||=1}||Xu|| = \sup_{j\in[n]}\sigma_j(X),
+||M|| := \sup_{u\in \mathbb{R}^n:||u||=1}||Mu|| = \sup_{j\in[n]}\sigma_j(M),
 \end{equation}
-which corresponds to the largest singular value of matrix $X$. The nuclear norm of matrix $X$ is denoted by
+which corresponds to the largest singular value of matrix $M$. The nuclear norm of matrix $M$ is denoted by
 \begin{equation}
-||X|| := \sum_{j\in[n]}\sigma_j(X),
+||M|| := \sum_{j\in[n]}\sigma_j(M),
 \end{equation}
-which corresponds to the sum of singular values of matrix $X$.
+which corresponds to the sum of singular values of matrix $M$. Additionally, we let $||M||_\infty := \max_{i,j}|M_{ij}|$.
+
+\subsection{Sampling scheme}
+Let $\pi_{ij}$ be the probability to observe the $(i,j)$ entiry of $M$. Let $C_j = \sum_{i=1}^{m_1} \pi_{ij}$ be the probability of observing an entry from column $j$ and $R_i = \sum_{j=1}^{m_2} \pi_{ij}$ be the probability of observing an entry from row $i$.
+If there is a noise in observation, then noisy observation of entry
+\begin{align}
+\bar{M}_{ij} = M_{ij} + \sigma\xi_{ij}, \quad (i,j) \in \Omega
+\end{align}
+where noise variable $\xi_{ij}$ satisfies $\mathbb{E}[\xi_{ij}] = 0$ and $\mathbb{E}[\xi_{ij}^2] = 1$, and $\sigma$ is the variance of the noise.
+
+In terms of the trace regression model, the observation also can be defined as
+\begin{align}
+\bar{M}_{i} = \text{tr}(E_i^\top M) + \sigma\xi_i, \quad i=1,...,n
+\end{align}
+where $E_i$ are random matrices of dimension $m_1 \times m_2$, and tr($X$) denotes the trace of matrix $X$. Each $E_i$ is i.i.d copy from a random matrix $E$ having distribution $\Pi$ on the set $\mathcal{E} = \{e_j(m_1)e_k^\top(m_2), 1\leq j \leq m_1, 1\leq k \leq m_2 \}$, where $e_j(m)$ is $j$th canonical basis vector in $\mathbb{R}^m$, i.e., zero vector except $i$th entry equal to 1. Following two stochastic terms play an important role in analysis. For an Rademacher sequence $\{\epsilon_i\}_{i=1}^{n}$, we define
+\begin{align}
+\Sigma_R = \frac{1}{n}\sum_{i=1}^{n}\epsilon_i E_i \quad \text{and} \quad\Sigma = \frac{\sigma}{n}\sum_{i=1}^{n}\xi_i E_i.
+\end{align}
+
+
+\subsection{Orthogonal projection}
+
+Set $U := \text{span}(u_1,...,u_r)$ and $V := \text{span}(v_1,...,v_r)$. It is convenient to introduce the orthogonal decomposition $\mathbb{R}^{m_1 \times m_2} = T \oplus T^\perp$ where $T$ is the linear space spanned by elements of the form $u_ky^\top$ and $xv_k^\top$, $1\leq k \leq r$, where $x$ and $y$ are arbitrary vectors, and $T^\perp$ is its orthogonal complement. The orthogonal projection $\mc{P}_T:\mathbb{R}^{m_1 \times m_2} \rightarrow T$ onto $T$ is given by
+\begin{equation}
+\mc{P}_T(Z) = P_U(Z) + ZP_V - P_UZP_V,
+\end{equation}
+where $P_U$ and $P_V$ are the orthogonal projections onto $U$ and $V$ respectively. The orthogonal projection onto $T^\perp$ is given by
+\begin{equation}
+\mc{P}_{T^\perp}(Z) = (I_{m_1} - P_U)Z(I_{m_2} - P_V),
+\end{equation}
+where $I_m$ denotes the $m \times m$ identity matrix.
 
 \section{Single Matrix Completion}
 The noiseless matrix completion was first studied by \cite{candes2009exact}, where the number of samples needed to recover a matrix of rank $r$ exactly is provided under some incoherent assumptions on the singular vectors of the matrix.
 \begin{definition}[Coherence \cite{candes2009exact}]
-Let $U$ be a subspace of $\mathbb{R}^n$ of dimension $r$ and $\mc{P}_U$ be the orthogonal projection onto $U$. Then the coherence of $U$ is defined to be
+Let $U$ be a subspace of $\mathbb{R}^n$ of dimension $r$, i.e., $U := \text{span}(u_1, ..., u_r)$, and $P_U$ be the orthogonal projection onto $U$. Then the coherence of $U$ is defined to be
 \begin{equation}
-\mu(U) := \frac{n}{r}\max_{1\leq i \leq n}||\mc{P}_Ue_i||^2,
+\mu(U) := \frac{m_1}{r}\max_{1\leq i \leq m_1}||P_U e_i||^2,
 \end{equation}
-where $e_i$ is the $i$th canonical basis vector in Euclidean space, i.e., zero vector except $i$th entry equal to 1.
+where $e_i$ is the $i$th canonical basis vector.
 \end{definition}
 
 \begin{assumption}
 The coherences obey $\max(\mu(U),\mu(V)) \leq \mu_0$ for some positive $\mu_0$.
 \end{assumption}
 \begin{assumption}
-The matrix $E=\sum_{1\leq k \leq r} u_k v_k^\top$ has a maximum entry bounded by $\mu_1 \sqrt{r/(n_1n_2)}$ in absolute value for some positive $\mu_1$.
+The matrix $E=\sum_{1\leq k \leq r} u_k v_k^\top$ has a maximum entry bounded by $\mu_1 \sqrt{r/(m_1m_2)}$ in absolute value for some positive $\mu_1$.
 \end{assumption}
 
 \begin{theorem}[\cite{candes2009exact}]
 Under the assumption 1 and 2, a nuclear norm minimisation
 \begin{align}
-\text{minimise}&\quad ||M||_* \\
-\text{subject to}&\quad \mc{P}_{\Omega}(M) = \mc{P}_{\Omega}(X) 
+\text{minimise}&\quad ||X||_* \\
+\text{subject to}&\quad \mc{P}_{\Omega}(X) = \mc{P}_{\Omega}(M) 
 \end{align}
-perfectly recovers the original matrix with high probability if the number of uniformly sampled entires $m$ obey $m\geq \mathcal{O}(\max(\mu_1^2,\mu_0^{1/2},\mu_1,\mu_0n^{1/4}) n r \beta \log n)$ for some $\beta > 2$.
+perfectly recovers the original matrix with high probability if the number of uniformly sampled entires $n$ obey $n\geq \mathcal{O}(\max(\mu_1^2,\mu_0^{1/2},\mu_1,\mu_0n^{1/4}) m_2 r \beta \log m_2)$ for some $\beta > 2$.
 \end{theorem}
-Later, a tighter analysis of the same convex relaxation was developed in \cite{candes2010power,recht2011simpler}. More practical settings, where the few observed entries are corrupted by noise, has been extensively studied recently \cite{candes2010matrix,keshavan2010matrix,negahban2012restricted,klopp2014noisy,lafond2015low}. These studies show that when the distribution on noise is additive and sub-exponential, then the prediction error with the nuclear norm minimiser $\hat{X}$ satisfies with high probability
-\begin{equation}
-\frac{||\hat{X} - X||^2_{F}}{n_1 n_2} = \mathcal{O}\bigg(
-\frac{(n_1+n_2) \text{rank}(X) \log (n_1 + n_2)}{m}
-\bigg),
-\end{equation}
-where $||\cdot||_F$ denotes the Frobenius norm, and $X\in\mathbb{R}^{n_1 \times n_2}$.
+Later, a tighter analysis of the same convex relaxation was developed in \cite{candes2010power,recht2011simpler}. More practical settings, where the few observed entries are corrupted by noise, has been extensively studied recently \cite{candes2010matrix,keshavan2010matrix,negahban2012restricted,klopp2014noisy,lafond2015low}. 
+%These studies show that when the distribution on noise is additive and sub-exponential, then the prediction error with the nuclear norm minimiser $\hat{X}$ satisfies with high probability
+%\begin{equation}
+%\frac{||\hat{X} - X||^2_{F}}{m_1 m_2} = \mathcal{O}\bigg(
+%\frac{(m_1+m_2) \text{rank}(X) \log (m_1 + m_2)}{m}
+%\bigg),
+%\end{equation}
+%where $||\cdot||_F$ denotes the Frobenius norm, and $X\in\mathbb{R}^{m_1 \times m_2}$.
+To prevent an overfitting of the noisy matrix observation, a penalised nuclear norm estimator of $M$ has been introduced
+\begin{align}\label{eqn:nn_est}
+\hat{X} = {\arg\min}_{||{X}||_\infty \leq \gamma} \bigg\{\frac{1}{n} \sum_{(i,j) \in \Omega}(\bar{M}_{ij} - {X}_{ij})^2 + \lambda ||{X}||_* \bigg\},
+\end{align}
+where $\lambda > 0$ is a regularisation parameter, and $\gamma$ is an upper on the absolute value of each entry. The optimiser consists of the sum of a data fitting terms and a nuclear norm penalisation term.
 
-\section{Joint Matrix Completion}
-Let $X \in \mathbb{R}^{n_1 \times n_2}$ and $Y \in \mathbb{R}^{n_1 \times n_3}$ be two matrices where the first dimension represents the same object, i.e. user-rating matrix $X$ and user-attribute matrix $Y$. When the number of observed entries $m_X$ of matrix $X$ is insufficient to obtain a stable estimator of the unobserved entries, one widely used heuristic method is a joint factorisation of $X$ and $Y$ with the hope that the both matrices share some common low-rank structure in its first dimension. The collaborative matrix factorisation has been widely used in practice, but there is not theoretical guarantee so far.
+\begin{theorem}[Noisy matrix completion \cite{klopp2014noisy}] 
+Let noisy observation of $M$ be sampled i.i.d. from distribution $\Pi$ with known variance of the noise $\sigma$. If $\lambda \geq 3||\Sigma||$ and following two assumptions are satisfied:
 
-One of our main question is how many samples are required to perfectly recover the original matrices $X$ and $Y$ under what assumptions. More precisely, an interesting question might be the number of observation $m_X$ of matrix $X$ needed to recover the matrix $X$ given the number of observation $m_Y$ of matrix $Y$ or vice versa. Often, it is more easier to obtain the entries of $Y$ instead of those in $X$, therefore, understanding the nature of joint completion will provide some guidelines to the joint completion approach. We start from an assumption to make the analysis feasible.
-
-\begin{assumption}\label{assume:share}
-Let SVD of $X = \sum_{i=1}^{r_X} \sigma_i^{(X)} u_i^{(X)} v_i^\top$ and $Y = \sum_{i=1}^{r_Y} \sigma_i^{(Y)} u_i^{(Y)} w_i^\top$. We assume that the rank of two matrices are the same, i.e., $r_X = r_Y = r$, and the singular vector $u_i^{(X)}$ and $u_i^{(Y)}$ are the same in order to share the common low-rank structure between two matrices\footnote{Remark: most of existing knowledge graph factorisation models such as RESCAL follow this assumption if we consider each relation as a matrix (a knowledge graph is a collection of matrices).}.
+\begin{assumption}
+There exists a positive constant $L \geq 1 $ such that
+$\max_{i,j}(C_i, R_j) \leq L / \min(m_1, m_2)$.
 \end{assumption}
 
-Let $Z = [X, Y] \in \mathbb{R}^{n_1 \times (n_2+n_3)}$ be the horizontally combined matrix of $X$ and $Y$. The SVD of $Z$ is $\sum_{i=1}^{r}\sigma_i u_i v_i^\top$ where $v_i^\top = [v_i^{(X)\top}, v_i^{(Y)\top}]$ is the stacked right singular vectors of $X$ and $Y$. If both singular vectors satisfy the incoherence assumptions, the joint matrix completion problem is reduced to the single matrix completion problem with different sampling rates between the first $n_2$ columns and the rightmost $n_3$ columns of combined matrix. Some of the previous studies focus on a non-uniform sampling distribution of matrix \cite{foygel2011learning,lounici2011optimal,negahban2012restricted,klopp2014noisy}. For example, popular movies are more likely to be rated by many users in a collaborative filtering. This will lead to different sampling distributions between different columns (rows). 
+\begin{assumption}
+There exists a positive constant $\mu \geq 1 $ such that
+$\pi_{jk} \geq (p m_1 m_2)^{-1}$.
+\end{assumption}
 
-Our problem is a special case of the sampling distribution where we sample $m_X$ samples from leftmost $n_2$ columns and $m_Y$ from rightmost $n_3$ columns.
+Then, there exist numerical constants $c_1$, and $c_2$ such that
+\begin{equation}
+\frac{||\hat{X} - M||_F^2}{m_1m_2} \leq \max\bigg\{ c_1 p^2 m_1 m_2 r (\lambda^2 + \gamma^2(\mathbb{E}[||\Sigma_R||])^2), c_2\gamma^2p\sqrt{\frac{\log(m_1 + m_2)}{n}} \bigg\},
+\end{equation}
+with probability at least $1 - 2/(m_1 + m_2)$.
+\end{theorem}
 
-\begin{question}[Lower bound on $m_X$]
-Assume that we have fully observed matrix $Y$. How many samples do we need from $X$ to perfectly recover matrix $X$?
+\textbf{Sketch of Proof}. From the definition of estimator in Equation $\ref{eqn:nn_est}$, we know that
+\begin{equation}
+\frac{1}{n} \sum_{(i,j) \in \Omega}(\bar{M}_{ij} - \hat{X}_{ij})^2 + \lambda||\hat{X}||_*
+\leq \frac{1}{n} \sum_{(i,j) \in \Omega}(\bar{M}_{ij} - {M}_{ij})^2 + \lambda||M||_*,
+\end{equation}
+which implies
+\begin{equation}
+\frac{1}{n}||\mathcal{P}_\Omega(M - \hat{X}) ||_F^2 \leq 2||\Sigma|| ||M - \hat{X}||_* + \lambda(||M||_* - ||\hat{X}||_*).
+\end{equation}
+
+
+\section{Joint Matrix Completion}
+Let $M \in \mathbb{R}^{m_1 \times m_2}$ and $N \in \mathbb{R}^{m_1 \times m_3}$ be two matrices where the first dimension represents the same object, i.e. user-rating matrix $M$ and user-attribute matrix $N$. When the number of observed entries $n_M$ of matrix $M$ is insufficient to obtain a stable estimator of the unobserved entries, one widely used heuristic method is a joint factorisation of $M$ and $N$ with the hope that the both matrices share some common low-rank structure in its first dimension. The collaborative matrix factorisation has been widely used in practice, but there is not theoretical guarantee so far.
+
+One of our main question is how many samples are required to perfectly recover the original matrices $M$ and $N$ under what assumptions. More precisely, an interesting question might be the number of observation $n_M$ of matrix $M$ needed to recover the matrix $M$ given the number of observation $n_N$ of matrix $N$ or vice versa. Often, it is more easier to obtain the entries of $N$ instead of those in $M$, therefore, understanding the nature of joint completion will provide some guidelines to the joint completion approach. We start from an assumption to make the analysis feasible.
+
+\begin{assumption}\label{assume:share}
+Let SVD of $M = \sum_{i=1}^{r_M} \sigma_i^{(M)} u_i^{(M)} v_i^\top$ and $N = \sum_{i=1}^{r_N} \sigma_i^{(N)} u_i^{(N)} w_i^\top$. We assume that the rank of two matrices are the same, i.e., $r_M = r_N = r$, and the singular vector $u_i^{(M)}$ and $u_i^{(N)}$ are the same in order to share the common low-rank structure between two matrices\footnote{Remark: most of existing knowledge graph factorisation models such as RESCAL follow this assumption if we consider each relation as a matrix (a knowledge graph is a collection of matrices).}.
+\end{assumption}
+
+Let $Z = [M, N] \in \mathbb{R}^{m_1 \times (m_2+m_3)}$ be the horizontally combined matrix of $M$ and $N$. The SVD of $Z$ is $\sum_{i=1}^{r}\sigma_i u_i v_i^\top$ where $v_i^\top = [v_i^{(M)\top}, v_i^{(N)\top}]$ is the stacked right singular vectors of $M$ and $N$. If both singular vectors satisfy the incoherence assumptions, the joint matrix completion problem is reduced to the single matrix completion problem with different sampling rates between the first $m_2$ columns and the rightmost $m_3$ columns of combined matrix. Some of the previous studies focus on a non-uniform sampling distribution of matrix \cite{foygel2011learning,lounici2011optimal,negahban2012restricted,klopp2014noisy}. For example, popular movies are more likely to be rated by many users in a collaborative filtering. This will lead to different sampling distributions between different columns (rows). 
+
+Our problem is a special case of the sampling distribution where we sample $n_M$ samples from leftmost $m_2$ columns and $n_N$ from rightmost $m_3$ columns.
+
+\begin{question}[Lower bound on $n_M$]
+Assume that we have fully observed matrix $N$. How many samples do we need from $M$ to perfectly recover matrix $M$?
 \end{question}
 
-\begin{question}[$m_X$ given $m_Y$]
-Given $m_Y$ uniformly sampled entries of matrix $Y$, how many samples do we need from $X$ to perfectly recover matrix $X$? More practically, what will be the relation between the reconstruction error on $X$ and the sample size $m_X$ and $m_Y$.
+\begin{question}[$n_M$ given $n_N$]
+Given $n_N$ uniformly sampled entries of matrix $N$, how many samples do we need from $M$ to perfectly recover matrix $M$? More practically, what will be the relation between the reconstruction error on $M$ and the sample size $n_M$ and $n_N$.
 \end{question}
 
-\begin{question}[Active learning on $Y$ to recover $X$]
-In many cases, it easy more easy to obtain entries of $Y$ instead of $X$. The question is which entry of $Y$ would be actively sampled to improve a reconstruction performance of $X$.
+\begin{question}[Active learning on $N$ to recover $M$]
+In many cases, it is more easy to obtain entries of $N$ instead of $M$. The question is which entry of $N$ would be actively sampled to improve the reconstruction performance of $M$.
 \end{question}
 
 
-%If the low-rank representations are the same, then we can apply the standard theories on the combined matrix $[X, Y] \in \mathbb{R}^{n_1 \times (n_2 + n_3)}$. However, this is not the case, under which conditions we can apply joint optimisation for reconstructing $X$ and what would be the error bound of the estimate? Following questions might be of interest to solve this problem.
+%If the low-rank representations are the same, then we can apply the standard theories on the combined matrix $[X, Y] \in \mathbb{R}^{m_1 \times (m_2 + m_3)}$. However, this is not the case, under which conditions we can apply joint optimisation for reconstructing $X$ and what would be the error bound of the estimate? Following questions might be of interest to solve this problem.
 %\begin{itemize}
 %\item What are the corresponding optimiser of the nuclear norm optimiser for the joint factorisation?
 %\item What structural assumptions should be made to link two matrices? for example, a certain similarity assumption between two singular value vectors or two low-rank representations? 
