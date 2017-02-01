@@ -63,7 +63,7 @@ Dongwoo Kim
 \maketitle
 
 \begin{abstract}
-Low-rank or approximately low-rank matrix approximation is a popular method to complete a matrix given partial observation of its entry. As the seminar work by \cite{candes2009exact} pointed out, one can recover the original matrix without error given an a certain number of samples with high probability. In practice, when the number of observations is not satisfying this criteria, one widely used heuristic to overcome the shortage of samples is to jointly completing multiple matrices that shares some parts of their dimensions. For example, to get a reliable estimator of user-movie rating matrix, one may use movie-actor matrix as additional information to get more information about movies. In this work, we would like to identify when and how this joint completion would work and why.
+Low-rank or approximately low-rank matrix approximation is a popular method to complete a matrix given partial observation of its entry. As the seminar work by \cite{candes2009exact} pointed out, one can recover the original matrix with high probability given a certain number of samples. In practice, when the number of observations is not satisfying this criteria, one widely used heuristic to overcome the shortage of samples is to jointly completing multiple matrices that shares some common dimensions. For example, to get a reliable estimator of user-movie rating matrix, one may use movie-actor matrix as additional information to get more information about movies. In this work, we would like to uncover when and how this joint completion would work and why.
 \end{abstract}
 
 \section{Preliminary}
@@ -89,7 +89,7 @@ The spectral norm of matrix $M$ is denoted by
 \end{equation}
 which corresponds to the largest singular value of matrix $M$. The nuclear norm of matrix $M$ is denoted by
 \begin{equation}
-||M|| := \sum_{j\in[n]}\sigma_j(M),
+||M||_* := \sum_{j\in[n]}\sigma_j(M),
 \end{equation}
 which corresponds to the sum of singular values of matrix $M$. Additionally, we let $||M||_\infty := \max_{i,j}|M_{ij}|$.
 
@@ -105,7 +105,7 @@ In terms of the trace regression model, the observation also can be defined as
 \begin{align}
 \bar{M}_{i} = \text{tr}(E_i^\top M) + \sigma\xi_i, \quad i=1,...,n
 \end{align}
-where $E_i$ are random matrices of dimension $m_1 \times m_2$, and tr($X$) denotes the trace of matrix $X$. Each $E_i$ is i.i.d copy from a random matrix $E$ having distribution $\Pi$ on the set $\mathcal{E} = \{e_j(m_1)e_k^\top(m_2), 1\leq j \leq m_1, 1\leq k \leq m_2 \}$, where $e_j(m)$ is $j$th canonical basis vector in $\mathbb{R}^m$, i.e., zero vector except $i$th entry equal to 1. Following two stochastic terms play an important role in analysis. For an Rademacher sequence $\{\epsilon_i\}_{i=1}^{n}$, we define
+where $E_i$ are random matrices of dimension $m_1 \times m_2$, and tr($X$) denotes the trace of matrix $X$. Each $E_i$ is i.i.d copy from a random matrix $E$ having distribution $\Pi$ on the set $\mathcal{E} = \{e_j(m_1)e_k^\top(m_2), 1\leq j \leq m_1, 1\leq k \leq m_2 \}$, where $e_j(m)$ is $j$th canonical basis vector in $\mathbb{R}^m$, i.e., zero vector except $i$th entry equal to 1. Following two stochastic terms play an important role in the case of noisy observation analysis. For an Rademacher sequence $\{\epsilon_i\}_{i=1}^{n}$, we define
 \begin{align}
 \Sigma_R = \frac{1}{n}\sum_{i=1}^{n}\epsilon_i E_i \quad \text{and} \quad\Sigma = \frac{\sigma}{n}\sum_{i=1}^{n}\xi_i E_i.
 \end{align}
@@ -158,9 +158,9 @@ Later, a tighter analysis of the same convex relaxation was developed in \cite{c
 %where $||\cdot||_F$ denotes the Frobenius norm, and $X\in\mathbb{R}^{m_1 \times m_2}$.
 To prevent an overfitting of the noisy matrix observation, a penalised nuclear norm estimator of $M$ has been introduced
 \begin{align}\label{eqn:nn_est}
-\hat{X} = {\arg\min}_{||{X}||_\infty \leq \gamma} \bigg\{\frac{1}{n} \sum_{(i,j) \in \Omega}(\bar{M}_{ij} - {X}_{ij})^2 + \lambda ||{X}||_* \bigg\},
+\hat{X} = {\arg\min}_{||{A}||_\infty \leq \gamma} \bigg\{\frac{1}{n} \sum_{(i,j) \in \Omega}(\bar{M}_{ij} - {A}_{ij})^2 + \lambda ||{A}||_* \bigg\},
 \end{align}
-where $\lambda > 0$ is a regularisation parameter, and $\gamma$ is an upper on the absolute value of each entry. The optimiser consists of the sum of a data fitting terms and a nuclear norm penalisation term.
+where $\bar{M}_{ij}$ is a noisy observation of $M_{ij}$, $\lambda > 0$ is a regularisation parameter, and $\gamma$ is an upper on the absolute value of each entry. The optimiser consists of the sum of a data fitting terms and a nuclear norm penalisation term.
 
 \begin{theorem}[Noisy matrix completion \cite{klopp2014noisy}] 
 Let noisy observation of $M$ be sampled i.i.d. from distribution $\Pi$ with known variance of the noise $\sigma$. If $\lambda \geq 3||\Sigma||$ and following two assumptions are satisfied:
@@ -182,16 +182,17 @@ Then, there exist numerical constants $c_1$, and $c_2$ such that
 with probability at least $1 - 2/(m_1 + m_2)$.
 \end{theorem}
 
-\textbf{Sketch of Proof}. From the definition of estimator in Equation $\ref{eqn:nn_est}$, we know that
-\begin{equation}
-\frac{1}{n} \sum_{(i,j) \in \Omega}(\bar{M}_{ij} - \hat{X}_{ij})^2 + \lambda||\hat{X}||_*
-\leq \frac{1}{n} \sum_{(i,j) \in \Omega}(\bar{M}_{ij} - {M}_{ij})^2 + \lambda||M||_*,
-\end{equation}
-which implies
-\begin{equation}
-\frac{1}{n}||\mathcal{P}_\Omega(M - \hat{X}) ||_F^2 \leq 2||\Sigma|| ||M - \hat{X}||_* + \lambda(||M||_* - ||\hat{X}||_*).
-\end{equation}
+An upper bound of the stochastic term $\mathbb{E}[||\Sigma_R||]$ could be also obtained under certain assumptions (e.g., sub-exponential noise). See more details in \cite{klopp2014noisy}.
 
+%\textbf{Sketch of Proof}. From the definition of estimator in Equation $\ref{eqn:nn_est}$, we know that
+%\begin{equation}
+%\frac{1}{n} \sum_{(i,j) \in \Omega}(\bar{M}_{ij} - \hat{X}_{ij})^2 + \lambda||\hat{X}||_*
+%\leq \frac{1}{n} \sum_{(i,j) \in \Omega}(\bar{M}_{ij} - {M}_{ij})^2 + \lambda||M||_*,
+%\end{equation}
+%which implies
+%\begin{equation}
+%\frac{1}{n}||\mathcal{P}_\Omega(M - \hat{X}) ||_F^2 \leq 2||\Sigma|| ||M - \hat{X}||_* + \lambda(||M||_* - ||\hat{X}||_*).
+%\end{equation}
 
 \section{Joint Matrix Completion}
 Let $M \in \mathbb{R}^{m_1 \times m_2}$ and $N \in \mathbb{R}^{m_1 \times m_3}$ be two matrices where the first dimension represents the same object, i.e. user-rating matrix $M$ and user-attribute matrix $N$. When the number of observed entries $n_M$ of matrix $M$ is insufficient to obtain a stable estimator of the unobserved entries, one widely used heuristic method is a joint factorisation of $M$ and $N$ with the hope that the both matrices share some common low-rank structure in its first dimension. The collaborative matrix factorisation has been widely used in practice, but there is not theoretical guarantee so far.
@@ -206,12 +207,21 @@ Let $Z = [M, N] \in \mathbb{R}^{m_1 \times (m_2+m_3)}$ be the horizontally combi
 
 Our problem is a special case of the sampling distribution where we sample $n_M$ samples from leftmost $m_2$ columns and $n_N$ from rightmost $m_3$ columns.
 
-\begin{question}[Lower bound on $n_M$]
-Assume that we have fully observed matrix $N$. How many samples do we need from $M$ to perfectly recover matrix $M$?
-\end{question}
-
 \begin{question}[$n_M$ given $n_N$]
 Given $n_N$ uniformly sampled entries of matrix $N$, how many samples do we need from $M$ to perfectly recover matrix $M$? More practically, what will be the relation between the reconstruction error on $M$ and the sample size $n_M$ and $n_N$.
+\end{question}
+Let the penalised estimator of joint matrix $Z$
+\begin{align}
+\hat{Z} = {\arg\min}_{||{A}||_\infty \leq \gamma} \bigg\{\frac{1}{n_M + n_N} \sum_{(i,j) \in \Omega}(\bar{Z}_{ij} - {A}_{ij})^2 + \lambda ||{A}||_* \bigg\},
+\end{align}
+where $\bar{Z}_{ij}$ denotes the noisy observation of $(i,j)$ entry of $Z$. Let $\hat{X}$ be the corresponding part of $M$ in $\hat{Z}$, then the first question corresponds to identify the bound on
+\begin{equation}
+\frac{||\hat{X} - M||_F^2}{m_1m_2}
+\end{equation}
+with respect to the other quantities such as $n_M$ and $n_N$? In this sense, our goal is to give a proper bound on a certain part of a matrix while the previous studies give upper bound on the while matrix.
+
+\begin{question}[Lower bound on $n_M$]
+Assume that we have fully observed matrix $N$. How many samples do we need from $M$ to perfectly recover matrix $M$?
 \end{question}
 
 \begin{question}[Active learning on $N$ to recover $M$]
