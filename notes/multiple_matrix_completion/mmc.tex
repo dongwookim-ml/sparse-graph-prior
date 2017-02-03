@@ -107,7 +107,7 @@ By the duality between nuclear and spectral norm, we can compute an upper bound 
 \langle M, N \rangle & = ||M|| \langle \frac{M}{||M||}, N \rangle \\
 & = ||M|| \text{tr}(\frac{M}{||M||}^\top N)\\
 & \leq ||M|| \sup_{||X|| \leq 1} \text{tr}(X^\top A)\\
-& = ||M||||A||_*.
+& = ||M||\,||A||_*.
 \end{align}
 
 \subsection{Sampling scheme}
@@ -243,7 +243,7 @@ Let the penalised estimator of joint matrix $Z$
 \label{eqn:z_estimator}
 \hat{Z} = {\arg\min}_{||{A}||_\infty \leq \gamma} \bigg\{\frac{1}{n_M + n_N} \sum_{(i,j) \in \Omega}(\bar{Z}_{ij} - {A}_{ij})^2 + \lambda ||{A}||_* \bigg\},
 \end{align}
-where $\bar{Z}_{ij}$ denotes the noisy observation of $(i,j)$ entry of $Z$. Let $\hat{X}$ be the corresponding part of $M$ in $\hat{Z}$, then the first question corresponds to identify the bound on
+where $\bar{Z}_{ij}$ denotes the noisy observation of $(i,j)$ entry of $Z$. Let $\hat{X}$ (\textit{resp.} $\hat{Y}$) be the corresponding part of $M$ (\textit{resp.} $N$) in $\hat{Z}$, then the first question corresponds to identify an upper bound on
 \begin{equation}
 \label{eqn:upper_m}
 \frac{||\hat{X} - M||_F^2}{m_1m_2}
@@ -255,31 +255,46 @@ The Frobenius norm error of the combined matrix can be decomposed into two diffe
 \label{eqn:decomp}
 \frac{||\hat{Z} - Z||_F^2}{m_1(m_2+m_3)} = \frac{||\hat{X} - M||_F^2}{m_1(m_2+m_3)} + \frac{||\hat{Y} - N||_F^2}{m_1(m_2+m_3)}.
 \end{equation}
-From the previous work, it is possible to obtain an upper bound on each term. However, this does not give any information gain obtained from the shared low rank structure. It is possible to obtain a proper upper bound on the combined matrix from the previous work. Therefore, a lower bound on the second term in RHS of equation \ref{eqn:decomp} can induce an upper bound on equation \ref{eqn:upper_m}.
+From the previous work, it is possible to obtain an upper bound on Frobenius error of combined matrix. However, this does not give any information gain obtained from the shared low rank structure. Therefore, a lower bound on the second term in RHS of equation \ref{eqn:decomp} is needed to induce an upper bound on equation \ref{eqn:upper_m}.
 
-From \ref{eqn:z_estimator}, the following inequality holds
+From the definition of estimator in Equation \ref{eqn:z_estimator}, the following inequality holds
 \begin{align}
 \frac{1}{n} \sum_{(i,j) \in \Omega}(\bar{Z}_{ij} - \hat{Z}_{ij})^2 + \lambda ||\hat{Z}||_* 
 \leq \frac{1}{n} \sum_{(i,j) \in \Omega}(\bar{Z}_{ij} - {Z}_{ij})^2 + \lambda ||{Z}||_*,
 \end{align}
 where $n = n_M + n_N$. This implies
 \begin{align}
-\frac{1}{n}||\mathcal{P}_\Omega(Z - \hat{Z}) ||_F^2 & \leq 2||\Sigma|| ||Z - \hat{Z}||_* + \lambda(||Z||_* - ||\hat{Z}||_*) \\
+\frac{1}{n}||\mathcal{P}_\Omega(Z - \hat{Z}) ||_F^2 \leq 2||\Sigma||\,||Z - \hat{Z}||_* + \lambda(||Z||_* - ||\hat{Z}||_*) \\
 \frac{1}{n}||\mc{P}_{\Omega_M}(M-\hat{M})||_F^2 + \frac{1}{n}||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2
-& \leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_F
+\leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_* \\
+\frac{1}{n}||\mc{P}_{\Omega_M}(M-\hat{M})||_F^2 
+\leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_* - \frac{1}{n}||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2
 \end{align}
-If $||M - \hat{M}||_\infty^{-1} \in $
+Let $\alpha = ||M - \hat{M}||_\infty (\leq 2\gamma)$. If $\alpha^{-1}(M-\hat{M}) \in \mc{C}(t)$, then
+\begin{align}
+\frac{n_M}{2n\alpha^2}||M-\hat{M}||_{\Pi^{(M)}}^2  - 44 \frac{ptm_1m_2n_M}{n}(\mathbb{E}||\Sigma_R^{(M)}||)^2 
+\leq \frac{n_M}{n}\frac{1}{\alpha^2n_M}||\mc{P}_{\Omega_M}(M-\hat{M})||_F^2 \\
+\frac{n_M}{2n}||M-\hat{M}||_{\Pi^{(M)}}^2  \leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_* - \frac{1}{n}||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2 + 44 \frac{\alpha^2 ptm_1m_2n_M}{n}(\mathbb{E}||\Sigma_R^{(M)}||)^2
+\end{align}
+Equation \ref{eqn:fro_ineq} implies
+\begin{align}
+\frac{n_M}{2nm_1m_2p^{(M)}}||M-\hat{M}||_F^2  \leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_* - \frac{1}{n}||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2 + 44 \frac{\alpha^2 ptm_1m_2n_M}{n}(\mathbb{E}||\Sigma_R^{(M)}||)^2.
+\end{align}
 
 \begin{lemma} Given constraint set
 \begin{equation}
-\mc{C}(r) = \bigg\{ A \in \mathbb{R}^{m_1 \times m_2}: ||A||_\infty = 1, ||A||_\Pi^2 \geq \sqrt{\frac{64\log(m_1+m_2)}{\log(6/5)n}}, ||A||_* \leq \sqrt{r}||A||_F \bigg\},
+\mc{C}(t) = \bigg\{ A \in \mathbb{R}^{m_1 \times m_2}: ||A||_\infty = 1, ||A||_\Pi^2 \geq \sqrt{\frac{64\log(m_1+m_2)}{\log(6/5)n}}, ||A||_* \leq \sqrt{t}||A||_F \bigg\},
 \end{equation}
-let $E_i$ be i.i.d. from distribution $\Pi$ on $\mc{E}$ which satisfies Assumptions \ref{assume:row_column} and \ref{assume:min_p}, and $\Sigma_R = n^{-1}\sum_{i=1}^{n}\epsilon_i E_i$, where $\{\epsilon_i\}_{i=1}^{n}$ is Rademacher sequence. Then, for all $A\in \mc{C}(r)$
+let $E_i$ be i.i.d. from distribution $\Pi$ on $\mc{E}$ which satisfies Assumptions \ref{assume:row_column} and \ref{assume:min_p}, and $\Sigma_R = n^{-1}\sum_{i=1}^{n}\epsilon_i E_i$, where $\{\epsilon_i\}_{i=1}^{n}$ is Rademacher sequence. Then, for all $A\in \mc{C}(t)$
 \begin{align}
-\frac{1}{n}||\mc{P}_{\Omega}(A)||_F^2 \geq \frac{1}{2}||A||_\Pi^2 - 44 prm_1m_2(\mathbb{E}[||\Sigma_R||])^2
+\frac{1}{2}||A||_\Pi^2  - 44 ptm_1m_2(\mathbb{E}[||\Sigma_R||])^2 \leq \frac{1}{n}||\mc{P}_{\Omega}(A)||_F^2
 \end{align}
-with probability at least $1-\frac{2}{m_1+m_2}$.
+with probability at least $1-2(m_1+m_2)^{-1}$.
 \end{lemma}
+
+\subsection{Lower Bound on $||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2$}
+
+It is crucial to derive a lower bound on $||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2$.
 
 \begin{question}[Approximate singular vectors]
 What if the left singular vectors of $M$ and those of $N$ are not equal, but approximate one another? (i.e., $u_i^{(M)} \approx u_i^{(N)}$)
