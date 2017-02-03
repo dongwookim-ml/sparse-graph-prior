@@ -93,6 +93,23 @@ which corresponds to the largest singular value of matrix $M$. The nuclear norm 
 \end{equation}
 which corresponds to the sum of singular values of matrix $M$. Additionally, we let $||M||_\infty := \max_{i,j}|M_{ij}|$.
 
+The Euclidean inner product between two matrices is defined by
+\begin{align}
+\langle M, N \rangle := \text{tr}(M^\top N),
+\end{align}
+and corresponding Frobenius norm is denoted as
+\begin{align}
+||M||_F
+\end{align}
+
+By the duality between nuclear and spectral norm, we can compute an upper bound on the Euclidean inner product between matricies
+\begin{align}
+\langle M, N \rangle & = ||M|| \langle \frac{M}{||M||}, N \rangle \\
+& = ||M|| \text{tr}(\frac{M}{||M||}^\top N)\\
+& \leq ||M|| \sup_{||X|| \leq 1} \text{tr}(X^\top A)\\
+& = ||M||||A||_*.
+\end{align}
+
 \subsection{Sampling scheme}
 Let $\pi_{ij}$ be the probability to observe the $(i,j)$ entiry of $M$. Let $C_j = \sum_{i=1}^{m_1} \pi_{ij}$ be the probability of observing an entry from column $j$ and $R_i = \sum_{j=1}^{m_2} \pi_{ij}$ be the probability of observing an entry from row $i$.
 If there is a noise in observation, then noisy observation of entry
@@ -109,7 +126,11 @@ where $E_i$ are random matrices of dimension $m_1 \times m_2$, and tr($X$) denot
 \begin{align}
 \Sigma_R = \frac{1}{n}\sum_{i=1}^{n}\epsilon_i E_i \quad \text{and} \quad\Sigma = \frac{\sigma}{n}\sum_{i=1}^{n}\xi_i E_i.
 \end{align}
-
+Let $||M||_\Pi^2 = \mathbb{E}[\langle E,M \rangle)]^2$, where the expectation is taken over ${E}$. If $\pi_{ij} \geq pm_1m_2$ for all entries, then this implies
+\begin{align}
+\label{eqn:fro_ineq}
+||M||_\Pi^2 \geq \frac{||M||_F^2}{pm_1m_2}.
+\end{align}
 
 \subsection{Orthogonal projection}
 
@@ -166,12 +187,14 @@ where $\bar{M}_{ij}$ is a noisy observation of $M_{ij}$, $\lambda > 0$ is a regu
 Let noisy observation of $M$ be sampled i.i.d. from distribution $\Pi$ with known variance of the noise $\sigma$. If $\lambda \geq 3||\Sigma||$ and following two assumptions are satisfied:
 
 \begin{assumption}
+\label{assume:row_column}
 There exists a positive constant $L \geq 1 $ such that
 $\max_{i,j}(C_i, R_j) \leq L / \min(m_1, m_2)$.
 \end{assumption}
 
 \begin{assumption}
-There exists a positive constant $\mu \geq 1 $ such that
+\label{assume:min_p}
+There exists a positive constant $p \geq 1 $ such that
 $\pi_{jk} \geq (p m_1 m_2)^{-1}$.
 \end{assumption}
 
@@ -205,20 +228,62 @@ Let SVD of $M = \sum_{i=1}^{r_M} \sigma_i^{(M)} u_i^{(M)} v_i^\top$ and $N = \su
 
 Let $Z = [M, N] \in \mathbb{R}^{m_1 \times (m_2+m_3)}$ be the horizontally combined matrix of $M$ and $N$. The SVD of $Z$ is $\sum_{i=1}^{r}\sigma_i u_i v_i^\top$ where $v_i^\top = [v_i^{(M)\top}, v_i^{(N)\top}]$ is the stacked right singular vectors of $M$ and $N$. If both singular vectors satisfy the incoherence assumptions, the joint matrix completion problem is reduced to the single matrix completion problem with different sampling rates between the first $m_2$ columns and the rightmost $m_3$ columns of combined matrix. Some of the previous studies focus on a non-uniform sampling distribution of matrix \cite{foygel2011learning,lounici2011optimal,negahban2012restricted,klopp2014noisy}. For example, popular movies are more likely to be rated by many users in a collaborative filtering. This will lead to different sampling distributions between different columns (rows). 
 
-Our problem is a special case of the sampling distribution where we sample $n_M$ samples from leftmost $m_2$ columns and $n_N$ from rightmost $m_3$ columns.
+Our problem is a special case of the sampling distribution where we sample $n_M$ samples from leftmost $m_2$ columns and $n_N$ from rightmost $m_3$ columns. More formally, let $\Pi_M$ be a distribution on set $\mathcal{E}^{(M)} = \{e_j(m_1)e_k^\top(m_2), 1\leq j \leq m_1, 1\leq k \leq m_2 \}$, and $\Pi_N$ a a distribution on set $\mathcal{E}^{(N)} = \{e_j(m_1)e_k^\top(m_3), 1\leq j \leq m_1, 1\leq k \leq m_3 \}$. And define $\Pi_\rho = \rho \Pi^{(M)} + (1-\rho) \Pi^{(N)}$ where $0 \leq \rho \leq 1$. %If we set $\rho = \frac{n_M}{n_M+n_N}$, and 
+There are $p^{(M)}$ and $p^{(N)}$ which satisfies Assumption \ref{assume:min_p} for each distribution, respectively, then the inequality in Equation \ref{eqn:fro_ineq} also holds as well
+\begin{align}
+||Z||_{\Pi_\rho}^2 \geq \frac{||Z||_F^2}{p'm_1(m_2+m_3)},
+\end{align}
+where $p' = \min(\rho p^{(M)}m_1m_2, (1-\rho) p^{(N)}m_1m_3)$.
 
 \begin{question}[$n_M$ given $n_N$]
 Given $n_N$ uniformly sampled entries of matrix $N$, how many samples do we need from $M$ to perfectly recover matrix $M$? More practically, what will be the relation between the reconstruction error on $M$ and the sample size $n_M$ and $n_N$.
 \end{question}
 Let the penalised estimator of joint matrix $Z$
 \begin{align}
+\label{eqn:z_estimator}
 \hat{Z} = {\arg\min}_{||{A}||_\infty \leq \gamma} \bigg\{\frac{1}{n_M + n_N} \sum_{(i,j) \in \Omega}(\bar{Z}_{ij} - {A}_{ij})^2 + \lambda ||{A}||_* \bigg\},
 \end{align}
 where $\bar{Z}_{ij}$ denotes the noisy observation of $(i,j)$ entry of $Z$. Let $\hat{X}$ be the corresponding part of $M$ in $\hat{Z}$, then the first question corresponds to identify the bound on
 \begin{equation}
+\label{eqn:upper_m}
 \frac{||\hat{X} - M||_F^2}{m_1m_2}
 \end{equation}
-with respect to the other quantities such as $n_M$ and $n_N$? In this sense, our goal is to give a proper bound on a certain part of a matrix while the previous studies give upper bound on the while matrix.
+with respect to the other quantities such as $n_M$ and $n_N$.
+
+The Frobenius norm error of the combined matrix can be decomposed into two different parts:
+\begin{equation}
+\label{eqn:decomp}
+\frac{||\hat{Z} - Z||_F^2}{m_1(m_2+m_3)} = \frac{||\hat{X} - M||_F^2}{m_1(m_2+m_3)} + \frac{||\hat{Y} - N||_F^2}{m_1(m_2+m_3)}.
+\end{equation}
+From the previous work, it is possible to obtain an upper bound on each term. However, this does not give any information gain obtained from the shared low rank structure. It is possible to obtain a proper upper bound on the combined matrix from the previous work. Therefore, a lower bound on the second term in RHS of equation \ref{eqn:decomp} can induce an upper bound on equation \ref{eqn:upper_m}.
+
+From \ref{eqn:z_estimator}, the following inequality holds
+\begin{align}
+\frac{1}{n} \sum_{(i,j) \in \Omega}(\bar{Z}_{ij} - \hat{Z}_{ij})^2 + \lambda ||\hat{Z}||_* 
+\leq \frac{1}{n} \sum_{(i,j) \in \Omega}(\bar{Z}_{ij} - {Z}_{ij})^2 + \lambda ||{Z}||_*,
+\end{align}
+where $n = n_M + n_N$. This implies
+\begin{align}
+\frac{1}{n}||\mathcal{P}_\Omega(Z - \hat{Z}) ||_F^2 & \leq 2||\Sigma|| ||Z - \hat{Z}||_* + \lambda(||Z||_* - ||\hat{Z}||_*) \\
+\frac{1}{n}||\mc{P}_{\Omega_M}(M-\hat{M})||_F^2 + \frac{1}{n}||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2
+& \leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_F
+\end{align}
+If $||M - \hat{M}||_\infty^{-1} \in $
+
+\begin{lemma} Given constraint set
+\begin{equation}
+\mc{C}(r) = \bigg\{ A \in \mathbb{R}^{m_1 \times m_2}: ||A||_\infty = 1, ||A||_\Pi^2 \geq \sqrt{\frac{64\log(m_1+m_2)}{\log(6/5)n}}, ||A||_* \leq \sqrt{r}||A||_F \bigg\},
+\end{equation}
+let $E_i$ be i.i.d. from distribution $\Pi$ on $\mc{E}$ which satisfies Assumptions \ref{assume:row_column} and \ref{assume:min_p}, and $\Sigma_R = n^{-1}\sum_{i=1}^{n}\epsilon_i E_i$, where $\{\epsilon_i\}_{i=1}^{n}$ is Rademacher sequence. Then, for all $A\in \mc{C}(r)$
+\begin{align}
+\frac{1}{n}||\mc{P}_{\Omega}(A)||_F^2 \geq \frac{1}{2}||A||_\Pi^2 - 44 prm_1m_2(\mathbb{E}[||\Sigma_R||])^2
+\end{align}
+with probability at least $1-\frac{2}{m_1+m_2}$.
+\end{lemma}
+
+\begin{question}[Approximate singular vectors]
+What if the left singular vectors of $M$ and those of $N$ are not equal, but approximate one another? (i.e., $u_i^{(M)} \approx u_i^{(N)}$)
+\end{question}
 
 \begin{question}[Lower bound on $n_M$]
 Assume that we have fully observed matrix $N$. How many samples do we need from $M$ to perfectly recover matrix $M$?
