@@ -270,7 +270,8 @@ where $n = n_M + n_N$. This implies
 \frac{1}{n}||\mc{P}_{\Omega_M}(M-\hat{M})||_F^2 
 \leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_* - \frac{1}{n}||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2
 \end{align}
-Let $\alpha = ||M - \hat{M}||_\infty (\leq 2\gamma)$. If $\alpha^{-1}(M-\hat{M}) \in \mc{C}(t)$, then
+
+Let $\alpha = ||M - \hat{M}||_\infty (\leq 2\gamma)$. If $\alpha^{-1}(M-\hat{M}) \in \mc{C}(t)$, then by Lemma \ref{lmm:constraintset}
 \begin{align}
 \frac{n_M}{2n\alpha^2}||M-\hat{M}||_{\Pi^{(M)}}^2  - 44 \frac{ptm_1m_2n_M}{n}(\mathbb{E}||\Sigma_R^{(M)}||)^2 
 \leq \frac{n_M}{n}\frac{1}{\alpha^2n_M}||\mc{P}_{\Omega_M}(M-\hat{M})||_F^2 \\
@@ -280,8 +281,17 @@ Equation \ref{eqn:fro_ineq} implies
 \begin{align}
 \frac{n_M}{2nm_1m_2p^{(M)}}||M-\hat{M}||_F^2  \leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_* - \frac{1}{n}||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2 + 44 \frac{\alpha^2 ptm_1m_2n_M}{n}(\mathbb{E}||\Sigma_R^{(M)}||)^2.
 \end{align}
+The upper bound on $||\mc{P}_Z(Z-\hat{Z})||_*$ can be decomposed into Frobenius error on two sub matrices:
+\begin{align}
+||\mc{P}_Z(Z-\hat{Z})||_* & \leq \sqrt{2\text{rank}(Z)}||Z-\hat{Z}||_F \\
+& =  \sqrt{2\text{rank}(Z)} \sqrt{||M-\hat{M}||_F^2 + ||N-\hat{N}||_F^2}\\
+& = 2\text{rank}(Z) + \frac{1}{4}||M-\hat{M}||_F^2 + ||N-\hat{N}||_F^2,
+\end{align}
+where the first inequality comes from $\text{rank}(\mc{P}_Z(A)) \leq \text{rank}(P_{U^\perp}AP_V) + \text{rank}(P_{U}A)$, and we use the identity $ab = a^2 + b^2/4$ in the third line.
 
-\begin{lemma} Given constraint set
+We need to find an inequality $||M-\hat{M}||_* \leq \sqrt{t}||M-\hat{M}||_F$ to find a proper value of $t$.
+
+\begin{lemma} \label{lmm:constraintset} Given constraint set
 \begin{equation}
 \mc{C}(t) = \bigg\{ A \in \mathbb{R}^{m_1 \times m_2}: ||A||_\infty = 1, ||A||_\Pi^2 \geq \sqrt{\frac{64\log(m_1+m_2)}{\log(6/5)n}}, ||A||_* \leq \sqrt{t}||A||_F \bigg\},
 \end{equation}
