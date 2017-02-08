@@ -22,8 +22,8 @@
 \declaretheorem[style=definition,qed=$\blacksquare$]{definition}
 \declaretheorem[style=definition,qed=$\blacktriangle$,sibling=definition]{example}
 
-\declaretheorem[style=plain,qed=$\lhd$,sibling=definition]{theorem}
-\declaretheorem[style=plain,qed=$\blacktriangle$,sibling=definition]{lemma}
+\declaretheorem[style=plain,qed=$\blacktriangle$,sibling=definition]{theorem}
+\declaretheorem[style=plain,qed=$\lhd$,sibling=definition]{lemma}
 
 %\newtheorem{definition}{Definition}
 \newtheorem{assumption}{A}
@@ -257,26 +257,33 @@ The Frobenius norm error of the combined matrix can be decomposed into two diffe
 \end{equation}
 From the previous work, it is possible to obtain an upper bound on Frobenius error of combined matrix. However, this does not give any information gain obtained from the shared low rank structure. Therefore, a lower bound on the second term in RHS of equation \ref{eqn:decomp} is needed to induce an upper bound on equation \ref{eqn:upper_m}.
 
-From the definition of estimator in Equation \ref{eqn:z_estimator}, the following inequality holds
+From the definition of estimator in Equation \ref{eqn:z_estimator}, the following inequality holds (the objective function  w.r.t optimiser $\hat{Z}$ is always less or equal than the objective function w.r.t unknown true matrix $Z$).
 \begin{align}
 \frac{1}{n} \sum_{(i,j) \in \Omega}(\bar{Z}_{ij} - \hat{Z}_{ij})^2 + \lambda ||\hat{Z}||_* 
 \leq \frac{1}{n} \sum_{(i,j) \in \Omega}(\bar{Z}_{ij} - {Z}_{ij})^2 + \lambda ||{Z}||_*,
 \end{align}
 where $n = n_M + n_N$. This implies
-\begin{align}
-\frac{1}{n}||\mathcal{P}_\Omega(Z - \hat{Z}) ||_F^2 \leq 2||\Sigma||\,||Z - \hat{Z}||_* + \lambda(||Z||_* - ||\hat{Z}||_*) \\
+\begin{equation}
+\frac{1}{n}||\mathcal{P}_\Omega(Z - \hat{Z}) ||_F^2 \leq 2||\Sigma||\,||Z - \hat{Z}||_* + \lambda(||Z||_* - ||\hat{Z}||_*). \\
+\end{equation}
+Applying Lemma \ref{lmm:normdiff} and triangular inequality $||Z - \hat{Z}||_* \leq ||\mc{P}_Z(Z - \hat{Z})||_* + ||\mc{P}_Z^\perp(Z - \hat{Z})||_*$, we obtain
+\begin{equation}
 \frac{1}{n}||\mc{P}_{\Omega_M}(M-\hat{M})||_F^2 + \frac{1}{n}||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2
-\leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_* \\
-\frac{1}{n}||\mc{P}_{\Omega_M}(M-\hat{M})||_F^2 
-\leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_* - \frac{1}{n}||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2
-\end{align}
+\leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_*.
+%\frac{1}{n}||\mc{P}_{\Omega_M}(M-\hat{M})||_F^2 
+%\leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_* - \frac{1}{n}||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2
+\label{eqn:tri}
+\end{equation}
 
 Let $\alpha = ||M - \hat{M}||_\infty (\leq 2\gamma)$. If $\alpha^{-1}(M-\hat{M}) \in \mc{C}(t)$, then by Lemma \ref{lmm:constraintset}
-\begin{align}
+\begin{equation}
 \frac{n_M}{2n\alpha^2}||M-\hat{M}||_{\Pi^{(M)}}^2  - 44 \frac{ptm_1m_2n_M}{n}(\mathbb{E}||\Sigma_R^{(M)}||)^2 
-\leq \frac{n_M}{n}\frac{1}{\alpha^2n_M}||\mc{P}_{\Omega_M}(M-\hat{M})||_F^2 \\
-\frac{n_M}{2n}||M-\hat{M}||_{\Pi^{(M)}}^2  \leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_* - \frac{1}{n}||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2 + 44 \frac{\alpha^2 ptm_1m_2n_M}{n}(\mathbb{E}||\Sigma_R^{(M)}||)^2
-\end{align}
+\leq \frac{n_M}{n}\frac{1}{\alpha^2n_M}||\mc{P}_{\Omega_M}(M-\hat{M})||_F^2 \label{eqn:apl_lmm}
+\end{equation}
+Combining \ref{eqn:tri} and \ref{eqn:apl_lmm} yields
+\begin{equation}
+\frac{n_M}{2n}||M-\hat{M}||_{\Pi^{(M)}}^2  \leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_* - \frac{1}{n}||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2 + 44 \frac{\alpha^2 ptm_1m_2n_M}{n}(\mathbb{E}||\Sigma_R^{(M)}||)^2.
+\end{equation}
 Equation \ref{eqn:fro_ineq} implies
 \begin{align}
 \frac{n_M}{2nm_1m_2p^{(M)}}||M-\hat{M}||_F^2  \leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_* - \frac{1}{n}||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2 + 44 \frac{\alpha^2 ptm_1m_2n_M}{n}(\mathbb{E}||\Sigma_R^{(M)}||)^2.
@@ -285,26 +292,41 @@ The upper bound on $||\mc{P}_Z(Z-\hat{Z})||_*$ can be decomposed into Frobenius 
 \begin{align}
 ||\mc{P}_Z(Z-\hat{Z})||_* & \leq \sqrt{2\text{rank}(Z)}||Z-\hat{Z}||_F \\
 & =  \sqrt{2\text{rank}(Z)} \sqrt{||M-\hat{M}||_F^2 + ||N-\hat{N}||_F^2}\\
-& = 2\text{rank}(Z) + \frac{1}{4}||M-\hat{M}||_F^2 + ||N-\hat{N}||_F^2,
+& \leq 2\text{rank}(Z) + \frac{1}{4}\bigg(||M-\hat{M}||_F^2 + ||N-\hat{N}||_F^2\bigg),
 \end{align}
-where the first inequality comes from $\text{rank}(\mc{P}_Z(A)) \leq \text{rank}(P_{U^\perp}AP_V) + \text{rank}(P_{U}A)$, and we use the identity $ab = a^2 + b^2/4$ in the third line.
+where the first inequality comes from $||A||_* \leq \sqrt{\text{rank}(A)}||A||_F$ and $\text{rank}(\mc{P}_Z(A)) \leq \text{rank}(P_{U^\perp}AP_V) + \text{rank}(P_{U}A)$, and we use the inequality $ab \leq a^2 + b^2/4$ in the third line.
 
-We need to find an inequality $||M-\hat{M}||_* \leq \sqrt{t}||M-\hat{M}||_F$ to find a proper value of $t$.
+%We need to find an inequality $||M-\hat{M}||_* \leq \sqrt{t}||M-\hat{M}||_F$ to find a proper value of $t$. %(solved by add new third constraints on set $\mc{C}$
 
 \begin{lemma} \label{lmm:constraintset} Given constraint set
 \begin{equation}
-\mc{C}(t) = \bigg\{ A \in \mathbb{R}^{m_1 \times m_2}: ||A||_\infty = 1, ||A||_\Pi^2 \geq \sqrt{\frac{64\log(m_1+m_2)}{\log(6/5)n}}, ||A||_* \leq \sqrt{t}||A||_F \bigg\},
+\mc{C}(t) = \bigg\{ A \in \mathbb{R}^{m_1 \times m_2}: ||A||_\infty = 1, ||A||_\Pi^2 \geq \sqrt{\frac{64\log(m_1+m_2)}{\log(6/5)n}}, ||A||_* \leq \sqrt{t}||B||_F \bigg\},
 \end{equation}
-let $E_i$ be i.i.d. from distribution $\Pi$ on $\mc{E}$ which satisfies Assumptions \ref{assume:row_column} and \ref{assume:min_p}, and $\Sigma_R = n^{-1}\sum_{i=1}^{n}\epsilon_i E_i$, where $\{\epsilon_i\}_{i=1}^{n}$ is Rademacher sequence. Then, for all $A\in \mc{C}(t)$
+where $A$ is a submatrix of $B$. Note that the condition $||A||_* \leq \sqrt{t}||B||_F$ always satisfied if $t$ = rank($B$) since $||A||_* \leq ||B||_*$. Let $E_i$ be i.i.d. from distribution $\Pi$ on $\mc{E}$ which satisfies Assumptions \ref{assume:row_column} and \ref{assume:min_p}, and $\Sigma_R = n^{-1}\sum_{i=1}^{n}\epsilon_i E_i$, where $\{\epsilon_i\}_{i=1}^{n}$ is Rademacher sequence. Then, for all $A\in \mc{C}(t)$
 \begin{align}
 \frac{1}{2}||A||_\Pi^2  - 44 ptm_1m_2(\mathbb{E}[||\Sigma_R||])^2 \leq \frac{1}{n}||\mc{P}_{\Omega}(A)||_F^2
 \end{align}
 with probability at least $1-2(m_1+m_2)^{-1}$.
 \end{lemma}
 
-\subsection{Lower Bound on $||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2$}
+\begin{lemma}\label{lmm:normdiff}For any pair of matrices $A, B \in \mathbb{R}^{m_1 \times m_2}$, we have
+\begin{equation}
+||A||_* - ||B||_* \leq ||\mc{P}_A(A-B)||_* - ||\mc{P}_A^\perp(A-B)||_*
+\end{equation}
+\end{lemma}
+\textbf{Proof} By definition $\mc{P}_A^\perp(B)$ for any matrix $B$, $||A + \mc{P}_A^\perp(B-A)||_* = ||A||_* + ||\mc{P}_A^\perp(B-A)||_*$
+\begin{align}
+||B||_* = ||B + A - A||_* &= ||A + \mc{P}^\perp_A(B-A) + \mc{P}_A(B-A)||_*\\
+&\geq ||A + \mc{P}^\perp_A(B-A)||_* + ||\mc{P}_A(B-A)||_*\\
+&= ||A||_* + ||\mc{P}^\perp_A(B-A)||_* + ||\mc{P}_A(B-A)||_*
+\end{align}
 
-It is crucial to derive a lower bound on $||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2$.
+%$A, B \in \mathbb{R}^{m_1 \times m_2}, ||A + \mc{P}_{A}^{\perp}(B)||_* = ||A||_* + ||\mc{P}_{X}^\perp(B)||_*$
+
+\subsection{Lower Bound on $||N-\hat{N}||_F^2$}
+
+It is crucial to derive a lower bound on $||N-\hat{N}||_F^2$. We can use the same argument used in \cite{lafond2015low} to show the lower bound.
+
 
 \begin{question}[Approximate singular vectors]
 What if the left singular vectors of $M$ and those of $N$ are not equal, but approximate one another? (i.e., $u_i^{(M)} \approx u_i^{(N)}$)
