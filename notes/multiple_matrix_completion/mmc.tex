@@ -126,10 +126,10 @@ where $E_i$ are random matrices of dimension $m_1 \times m_2$, and tr($X$) denot
 \begin{align}
 \Sigma_R = \frac{1}{n}\sum_{i=1}^{n}\epsilon_i E_i \quad \text{and} \quad\Sigma = \frac{\sigma}{n}\sum_{i=1}^{n}\xi_i E_i.
 \end{align}
-Let $||M||_\Pi^2 = \mathbb{E}[\langle E,M \rangle)]^2$, where the expectation is taken over ${E}$. If $\pi_{ij} \geq pm_1m_2$ for all entries, then this implies
+Let $||M||_{L_2(\Pi)}^2 = \mathbb{E}[\langle E,M \rangle)]^2$, where the expectation is taken over ${E}$. If $\pi_{ij} \geq pm_1m_2$ for all entries, then this implies
 \begin{align}
 \label{eqn:fro_ineq}
-||M||_\Pi^2 \geq \frac{||M||_F^2}{pm_1m_2}.
+||M||_{L_2(\Pi)}^2 \geq \frac{||M||_F^2}{pm_1m_2}.
 \end{align}
 
 \subsection{Orthogonal projection}
@@ -200,12 +200,12 @@ $\pi_{jk} \geq (p m_1 m_2)^{-1}$.
 
 Then, there exist numerical constants $c_1$, and $c_2$ such that
 \begin{equation}
-\frac{||\hat{X} - M||_F^2}{m_1m_2} \leq \max\bigg\{ c_1 p^2 m_1 m_2 r (\lambda^2 + \gamma^2(\mathbb{E}[||\Sigma_R||])^2), c_2\gamma^2p\sqrt{\frac{\log(m_1 + m_2)}{n}} \bigg\},
+\frac{||\hat{X} - M||_F^2}{m_1m_2} \leq \max\bigg\{ c_1 p^2 m_1 m_2 r (\lambda^2 + \gamma^2(\mathbb{E}||\Sigma_R||)^2), c_2\gamma^2p\sqrt{\frac{\log(m_1 + m_2)}{n}} \bigg\},
 \end{equation}
 with probability at least $1 - 2/(m_1 + m_2)$.
 \end{theorem}
 
-An upper bound of the stochastic term $\mathbb{E}[||\Sigma_R||]$ could be also obtained under certain assumptions (e.g., sub-exponential noise). See more details in \cite{klopp2014noisy}.
+An upper bound of the stochastic term $\mathbb{E}||\Sigma_R||$ could be also obtained under certain assumptions (e.g., sub-exponential noise). See more details in \cite{klopp2014noisy}.
 
 %\textbf{Sketch of Proof}. From the definition of estimator in Equation $\ref{eqn:nn_est}$, we know that
 %\begin{equation}
@@ -218,93 +218,103 @@ An upper bound of the stochastic term $\mathbb{E}[||\Sigma_R||]$ could be also o
 %\end{equation}
 
 \section{Joint Matrix Completion}
-Let $M \in \mathbb{R}^{m_1 \times m_2}$ and $N \in \mathbb{R}^{m_1 \times m_3}$ be two matrices where the first dimension represents the same object, i.e. user-rating matrix $M$ and user-attribute matrix $N$. When the number of observed entries $n_M$ of matrix $M$ is insufficient to obtain a stable estimator of the unobserved entries, one widely used heuristic method is a joint factorisation of $M$ and $N$ with the hope that the both matrices share some common low-rank structure in its first dimension. The collaborative matrix factorisation has been widely used in practice, but there is not theoretical guarantee so far.
+Let $A_0 \in \mathbb{R}^{m_1 \times m_2}$ and $B_0 \in \mathbb{R}^{m_1 \times m_3}$ be two matrices where the first dimension represents the same object, i.e. user-rating matrix $A$ and user-attribute matrix $B$. When the number of observed entries $n_A$ of matrix $A_0$ is insufficient to obtain a stable estimator of the unobserved entries, one widely used heuristic method is a joint factorisation of $A_0$ and $B_0$ with the hope that the both matrices share some common low-rank structure in its first dimension. The collaborative matrix factorisation has been widely used in practice, but there is not theoretical guarantee so far.
 
-One of our main question is how many samples are required to perfectly recover the original matrices $M$ and $N$ under what assumptions. More precisely, an interesting question might be the number of observation $n_M$ of matrix $M$ needed to recover the matrix $M$ given the number of observation $n_N$ of matrix $N$ or vice versa. Often, it is more easier to obtain the entries of $N$ instead of those in $M$, therefore, understanding the nature of joint completion will provide some guidelines to the joint completion approach. We start from an assumption to make the analysis feasible.
+One of our main question is how many samples are required to perfectly recover the original matrices $A_0$ and $B_0$ under what assumptions. More precisely, an interesting question might be the number of observation $n_A$ of matrix $A_0$ needed to recover the matrix $A_0$ given the number of observation $n_B$ of matrix $B_0$ or vice versa. Often, it is more easier to obtain the entries of $B_0$ instead of those in $A_0$, therefore, understanding the nature of joint completion will provide some guidelines to the joint completion approach. We start from an assumption to make the analysis feasible.
 
 \begin{assumption}\label{assume:share}
-Let SVD of $M = \sum_{i=1}^{r_M} \sigma_i^{(M)} u_i^{(M)} v_i^\top$ and $N = \sum_{i=1}^{r_N} \sigma_i^{(N)} u_i^{(N)} w_i^\top$. We assume that the rank of two matrices are the same, i.e., $r_M = r_N = r$, and the singular vector $u_i^{(M)}$ and $u_i^{(N)}$ are the same in order to share the common low-rank structure between two matrices\footnote{Remark: most of existing knowledge graph factorisation models such as RESCAL follow this assumption if we consider each relation as a matrix (a knowledge graph is a collection of matrices).}.
+Let SVD of $A_0 = \sum_{i=1}^{r_A} \sigma_i^{(A_0)} u_i^{(A_0)} v_i^\top$ and $B_0 = \sum_{i=1}^{r_B} \sigma_i^{(B_0)} u_i^{(B_0)} w_i^\top$. We assume that the rank of two matrices are the same, i.e., $r_M = r_N = r$, and the singular vector $u_i^{(A_0)}$ and $u_i^{(B_0)}$ are the same in order to share the common low-rank structure between two matrices\footnote{Remark: most of existing knowledge graph factorisation models such as RESCAL follow this assumption if we consider each relation as a matrix (a knowledge graph is a collection of matrices).}.
 \end{assumption}
 
-Let $Z = [M, N] \in \mathbb{R}^{m_1 \times (m_2+m_3)}$ be the horizontally combined matrix of $M$ and $N$. The SVD of $Z$ is $\sum_{i=1}^{r}\sigma_i u_i v_i^\top$ where $v_i^\top = [v_i^{(M)\top}, v_i^{(N)\top}]$ is the stacked right singular vectors of $M$ and $N$. If both singular vectors satisfy the incoherence assumptions, the joint matrix completion problem is reduced to the single matrix completion problem with different sampling rates between the first $m_2$ columns and the rightmost $m_3$ columns of combined matrix. Some of the previous studies focus on a non-uniform sampling distribution of matrix \cite{foygel2011learning,lounici2011optimal,negahban2012restricted,klopp2014noisy}. For example, popular movies are more likely to be rated by many users in a collaborative filtering. This will lead to different sampling distributions between different columns (rows). 
+Let $Z_0 = [A_0, B_0] \in \mathbb{R}^{m_1 \times (m_2+m_3)}$ be the horizontally combined matrix of $A_0$ and $B_0$. The SVD of $Z$ is $\sum_{i=1}^{r}\sigma_i u_i v_i^\top$ where $v_i^\top = [v_i^{(A_0)\top}, v_i^{(B_0)\top}]$ is the stacked right singular vectors of $A_0$ and $B_0$. If both singular vectors satisfy the incoherence assumptions, the joint matrix completion problem is reduced to the single matrix completion problem with different sampling rates between the first $m_2$ columns and the rightmost $m_3$ columns of combined matrix. Some of the previous studies focus on a non-uniform sampling distribution of matrix \cite{foygel2011learning,lounici2011optimal,negahban2012restricted,klopp2014noisy}. For example, popular movies are more likely to be rated by many users in a collaborative filtering. This will lead to different sampling distributions between different columns (rows). 
 
-Our problem is a special case of the sampling distribution where we sample $n_M$ samples from leftmost $m_2$ columns and $n_N$ from rightmost $m_3$ columns. More formally, let $\Pi_M$ be a distribution on set $\mathcal{E}^{(M)} = \{e_j(m_1)e_k^\top(m_2), 1\leq j \leq m_1, 1\leq k \leq m_2 \}$, and $\Pi_N$ a a distribution on set $\mathcal{E}^{(N)} = \{e_j(m_1)e_k^\top(m_3), 1\leq j \leq m_1, 1\leq k \leq m_3 \}$. And define $\Pi_\rho = \rho \Pi^{(M)} + (1-\rho) \Pi^{(N)}$ where $0 \leq \rho \leq 1$. %If we set $\rho = \frac{n_M}{n_M+n_N}$, and 
-There are $p^{(M)}$ and $p^{(N)}$ which satisfies Assumption \ref{assume:min_p} for each distribution, respectively, then the inequality in Equation \ref{eqn:fro_ineq} also holds as well
+Our problem is a special case where we sample $n_M$ samples from leftmost $m_2$ columns and $n_N$ from rightmost $m_3$ columns. More formally, let $\Pi_A$ be a distribution on set $\mc{E}^{A} = \{e_j(m_1)e_k^\top(m_2+m_3), 1\leq j \leq m_1, 1\leq k \leq m_2\}$, and $\Pi_{B}$ a distribution on set $\mc{E}^{B} = \{e_j(m_1)e_k^\top(m_2+m_3), 1\leq j \leq m_1, 1+m_2\leq k \leq m_2+m_3\}$. And define $\Pi_\rho = \rho \Pi^{A} + (1-\rho)\Pi^{B}$ where $0 < \rho < 1/2$. If $\Phi_A$ and $\Phi_B$ satisfy Assumption \ref{assume:min_p} with parameter $p_A$ and $p_B$, Equation \ref{eqn:fro_ineq} implies
 \begin{align}
-||Z||_{\Pi_\rho}^2 \geq \frac{||Z||_F^2}{p'm_1(m_2+m_3)},
+||Z_0||_{L_2(\Pi_\rho)}^2 \geq \min(\frac{\rho}{p_Am_1m_2},\frac{1-\rho}{p_Bm_1m_3})||Z_0||_F^2 \geq \frac{\rho}{pm_1(m_2+m_3)},
 \end{align}
-where $p' = \min(\rho p^{(M)}m_1m_2, (1-\rho) p^{(N)}m_1m_3)$.
+where $p = \min(p_A, p_B)$.
 
-\begin{question}[$n_M$ given $n_N$]
-Given $n_N$ uniformly sampled entries of matrix $N$, how many samples do we need from $M$ to perfectly recover matrix $M$? More practically, what will be the relation between the reconstruction error on $M$ and the sample size $n_M$ and $n_N$.
+%And define $\Pi_\rho = \rho \Pi^{(M)} + (1-\rho) \Pi^{(N)}$ where $0 \leq \rho \leq 1$. %If we set $\rho = \frac{n_M}{n_M+n_N}$, and 
+%There are $p^{(M)}$ and $p^{(N)}$ which satisfies Assumption \ref{assume:min_p} for each distribution, respectively, then the inequality in Equation \ref{eqn:fro_ineq} also holds as well
+%\begin{align}
+%||Z||_{\Pi_\rho}^2 \geq \frac{||Z||_F^2}{p'm_1(m_2+m_3)},
+%\end{align}
+%where $p' = \min(\rho p^{(M)}m_1m_2, (1-\rho) p^{(N)}m_1m_3)$.
+
+\begin{question}[$n_A$ given $n_B$]
+Given $n_B$ uniformly sampled entries of matrix $B_0$, how many samples do we need from $A_0$ to perfectly recover matrix $A_0$? More practically, what will be the relation between the reconstruction error on $A_0$ and the sample size $n_A$ and $n_B$.
 \end{question}
 Let the penalised estimator of joint matrix $Z$
 \begin{align}
 \label{eqn:z_estimator}
 \hat{Z} = {\arg\min}_{||{A}||_\infty \leq \gamma} \bigg\{\frac{1}{n_M + n_N} \sum_{(i,j) \in \Omega}(\bar{Z}_{ij} - {A}_{ij})^2 + \lambda ||{A}||_* \bigg\},
 \end{align}
-where $\bar{Z}_{ij}$ denotes the noisy observation of $(i,j)$ entry of $Z$. Let $\hat{X}$ (\textit{resp.} $\hat{Y}$) be the corresponding part of $M$ (\textit{resp.} $N$) in $\hat{Z}$, then the first question corresponds to identify an upper bound on
-\begin{equation}
-\label{eqn:upper_m}
-\frac{||\hat{X} - M||_F^2}{m_1m_2}
-\end{equation}
-with respect to the other quantities such as $n_M$ and $n_N$.
+where $\bar{Z}_{ij}$ denotes the noisy observation of $(i,j)$ entry of $Z_0$. Let $\hat{A}$ (\textit{resp.} $\hat{B}$) be the corresponding part of $A_0$ (\textit{resp.} $B_0$) in $\hat{Z}$, then the first question corresponds to identify an upper bound on
+$||\hat{A} - A_0||_F^2$
+with respect to the other quantities such as $n_A$ and $n_B$.
 
 The Frobenius norm error of the combined matrix can be decomposed into two different parts:
 \begin{equation}
 \label{eqn:decomp}
-\frac{||\hat{Z} - Z||_F^2}{m_1(m_2+m_3)} = \frac{||\hat{X} - M||_F^2}{m_1(m_2+m_3)} + \frac{||\hat{Y} - N||_F^2}{m_1(m_2+m_3)}.
+\frac{||\hat{Z} - Z||_F^2}{m_1(m_2+m_3)} = \frac{||\hat{A} - A_0||_F^2}{m_1(m_2+m_3)} + \frac{||\hat{B} - B_0||_F^2}{m_1(m_2+m_3)}.
 \end{equation}
-From the previous work, it is possible to obtain an upper bound on Frobenius error of combined matrix. However, this does not give any information gain obtained from the shared low rank structure. Therefore, a lower bound on the second term in RHS of equation \ref{eqn:decomp} is needed to induce an upper bound on equation \ref{eqn:upper_m}.
 
-From the definition of estimator in Equation \ref{eqn:z_estimator}, the following inequality holds (the objective function  w.r.t optimiser $\hat{Z}$ is always less or equal than the objective function w.r.t unknown true matrix $Z$).
+%From the previous work, it is possible to obtain an upper bound on Frobenius error of combined matrix. However, this does not give any information gain obtained from the shared low rank structure. Therefore, a lower bound on the second term in RHS of equation \ref{eqn:decomp} is needed to induce an upper bound on equation \ref{eqn:upper_m}.
+
+From the definition of estimator in Equation \ref{eqn:z_estimator}, the following inequality holds (the objective function  w.r.t optimiser $\hat{Z}$ is always less or equal than the objective function w.r.t unknown true matrix $Z_0$).
 \begin{align}
 \frac{1}{n} \sum_{(i,j) \in \Omega}(\bar{Z}_{ij} - \hat{Z}_{ij})^2 + \lambda ||\hat{Z}||_* 
-\leq \frac{1}{n} \sum_{(i,j) \in \Omega}(\bar{Z}_{ij} - {Z}_{ij})^2 + \lambda ||{Z}||_*,
+\leq \frac{1}{n} \sum_{(i,j) \in \Omega}(\bar{Z}_{ij} - {Z}_{0ij})^2 + \lambda ||Z_0||_*,
 \end{align}
 where $n = n_M + n_N$. This implies
 \begin{equation}
-\frac{1}{n}||\mathcal{P}_\Omega(Z - \hat{Z}) ||_F^2 \leq 2||\Sigma||\,||Z - \hat{Z}||_* + \lambda(||Z||_* - ||\hat{Z}||_*). \\
+\frac{1}{n}||\mathcal{P}_\Omega(Z_0 - \hat{Z}) ||_F^2 \leq 2||\Sigma||\,||Z_0 - \hat{Z}||_* + \lambda(||Z_0||_* - ||\hat{Z}||_*). \\
 \end{equation}
-Applying Lemma \ref{lmm:normdiff} and triangular inequality $||Z - \hat{Z}||_* \leq ||\mc{P}_Z(Z - \hat{Z})||_* + ||\mc{P}_Z^\perp(Z - \hat{Z})||_*$, we obtain
+Applying Lemma \ref{lmm:normdiff} and using triangular inequality $||Z_0 - \hat{Z}||_* \leq ||\mc{P}_{Z_0}(Z_0 - \hat{Z})||_* + ||\mc{P}_{Z_0}^\perp(Z_0 - \hat{Z})||_*$, we obtain
 \begin{equation}
-\frac{1}{n}||\mc{P}_{\Omega_M}(M-\hat{M})||_F^2 + \frac{1}{n}||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2
-\leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_*.
-%\frac{1}{n}||\mc{P}_{\Omega_M}(M-\hat{M})||_F^2 
-%\leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_* - \frac{1}{n}||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2
+\frac{1}{n}||\mathcal{P}_\Omega(Z_0 - \hat{Z}) ||_F^2 = \frac{1}{n}||\mc{P}_{\Omega_A}(A_0-\hat{A})||_F^2 + \frac{1}{n}||\mc{P}_{\Omega_B}(B_0-\hat{B})||_F^2
+\leq \frac{5}{3}\lambda ||\mc{P}_Z(Z_0-\hat{Z})||_*.
 \label{eqn:tri}
 \end{equation}
 
-Let $\alpha = ||M - \hat{M}||_\infty (\leq 2\gamma)$. If $\alpha^{-1}(M-\hat{M}) \in \mc{C}(t)$, then by Lemma \ref{lmm:constraintset}
-\begin{equation}
-\frac{n_M}{2n\alpha^2}||M-\hat{M}||_{\Pi^{(M)}}^2  - 44 \frac{ptm_1m_2n_M}{n}(\mathbb{E}||\Sigma_R^{(M)}||)^2 
-\leq \frac{n_M}{n}\frac{1}{\alpha^2n_M}||\mc{P}_{\Omega_M}(M-\hat{M})||_F^2 \label{eqn:apl_lmm}
-\end{equation}
-Combining \ref{eqn:tri} and \ref{eqn:apl_lmm} yields
-\begin{equation}
-\frac{n_M}{2n}||M-\hat{M}||_{\Pi^{(M)}}^2  \leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_* - \frac{1}{n}||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2 + 44 \frac{\alpha^2 ptm_1m_2n_M}{n}(\mathbb{E}||\Sigma_R^{(M)}||)^2.
-\end{equation}
-Equation \ref{eqn:fro_ineq} implies
-\begin{align}
-\frac{n_M}{2nm_1m_2p^{(M)}}||M-\hat{M}||_F^2  \leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_* - \frac{1}{n}||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2 + 44 \frac{\alpha^2 ptm_1m_2n_M}{n}(\mathbb{E}||\Sigma_R^{(M)}||)^2.
-\end{align}
-The upper bound on $||\mc{P}_Z(Z-\hat{Z})||_*$ can be decomposed into Frobenius error on two sub matrices:
-\begin{align}
-||\mc{P}_Z(Z-\hat{Z})||_* & \leq \sqrt{2\text{rank}(Z)}||Z-\hat{Z}||_F \\
-& =  \sqrt{2\text{rank}(Z)} \sqrt{||M-\hat{M}||_F^2 + ||N-\hat{N}||_F^2}\\
-& \leq 2\text{rank}(Z) + \frac{1}{4}\bigg(||M-\hat{M}||_F^2 + ||N-\hat{N}||_F^2\bigg),
-\end{align}
-where the first inequality comes from $||A||_* \leq \sqrt{\text{rank}(A)}||A||_F$ and $\text{rank}(\mc{P}_Z(A)) \leq \text{rank}(P_{U^\perp}AP_V) + \text{rank}(P_{U}A)$, and we use the inequality $ab \leq a^2 + b^2/4$ in the third line.
+%Let $\alpha = ||M - \hat{M}||_\infty (\leq 2\gamma)$. If $\alpha^{-1}(M-\hat{M}) \in \mc{C}(t)$, then by Lemma \ref{lmm:constraintset}
+%\begin{equation}
+%\frac{n_M}{2n\alpha^2}||M-\hat{M}||_{\Pi^{(M)}}^2  - 44 \frac{ptm_1m_2n_M}{n}(\mathbb{E}||\Sigma_R^{(M)}||)^2 
+%\leq \frac{n_M}{n}\frac{1}{\alpha^2n_M}||\mc{P}_{\Omega_M}(M-\hat{M})||_F^2 \label{eqn:apl_lmm}
+%\end{equation}
+%Same argument can be made on the lower bound of $||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2$ if $\beta^{-1}(N-\hat{N}) \in \mc{C}(t)$
+%\begin{equation}
+%\label{eqn:apl_lmm2}
+%\frac{n_N}{2n\beta^2}||N-\hat{N}||_{\Pi^{(N)}}^2  - 44 \frac{ptm_1m_3n_N}{n}(\mathbb{E}||\Sigma_R^{(N)}||)^2 
+%\leq \frac{n_N}{n}\frac{1}{\beta^2n_N}||\mc{P}_{\Omega_N}(N-\hat{N})||_F^2 
+%\end{equation}
+%Combining \ref{eqn:tri}, \ref{eqn:apl_lmm} and \ref{eqn:apl_lmm2} yields
+%\begin{align}
+%&\frac{n_M}{2n}||M-\hat{M}||_{\Pi^{(M)}}^2 + \frac{n_N}{2n}||N-\hat{N}||_{\Pi^{(N)}}^2&  \notag\\
+%&\quad \leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_* + 176 \frac{ptm_1\gamma^2}{n}\bigg(m_2n_M(\mathbb{E}||\Sigma_R^{(M)}||)^2 + m_3n_N(\mathbb{E}||\Sigma_R^{(N)}||)^2\bigg).&
+%\end{align}
+%Equation \ref{eqn:fro_ineq} implies
+%\begin{align}
+%&\frac{n_M}{2nm_1m_2p}||M-\hat{M}||_F^2 + \frac{n_N}{2nm_1m_3p}||N-\hat{N}||_F^2& \notag\\
+%&\quad \leq \frac{5}{3}\lambda ||\mc{P}_Z(Z-\hat{Z})||_* + 176 \frac{ptm_1\gamma^2}{n}\bigg(m_2n_M(\mathbb{E}||\Sigma_R^{(M)}||)^2 + m_3n_N(\mathbb{E}||\Sigma_R^{(N)}||)^2\bigg).&
+%\end{align}
+%The upper bound on $||\mc{P}_Z(Z-\hat{Z})||_*$ can be decomposed into Frobenius error on two sub matrices:
+%\begin{align}
+%||\mc{P}_Z(Z-\hat{Z})||_* & \leq \sqrt{2r}||Z-\hat{Z}||_F \\
+%& =  \sqrt{2r} \sqrt{||M-\hat{M}||_F^2 + ||N-\hat{N}||_F^2}\\
+%& \leq 2r + \frac{1}{4}\bigg(||M-\hat{M}||_F^2 + ||N-\hat{N}||_F^2\bigg),
+%\end{align}
+%where the first inequality comes from $||A||_* \leq \sqrt{\text{rank}(A)}||A||_F$ and $\text{rank}(\mc{P}_Z(A)) \leq \text{rank}(P_{U^\perp}AP_V) + \text{rank}(P_{U}A)$, and we use the inequality $ab \leq a^2 + b^2/4$ in the third line.
 
-%We need to find an inequality $||M-\hat{M}||_* \leq \sqrt{t}||M-\hat{M}||_F$ to find a proper value of $t$. %(solved by add new third constraints on set $\mc{C}$
 
 \begin{lemma} \label{lmm:constraintset} Given constraint set
 \begin{equation}
-\mc{C}(t) = \bigg\{ A \in \mathbb{R}^{m_1 \times m_2}: ||A||_\infty = 1, ||A||_\Pi^2 \geq \sqrt{\frac{64\log(m_1+m_2)}{\log(6/5)n}}, ||A||_* \leq \sqrt{t}||B||_F \bigg\},
+\mc{C}(t) = \bigg\{ A \in \mathbb{R}^{m_1 \times m_2}: ||A||_\infty = 1, ||A||_{L_2(\Pi)}^2 \geq \sqrt{\frac{64\log(m_1+m_2)}{\log(6/5)n}}, ||A||_* \leq \sqrt{t}||A||_F \bigg\},
 \end{equation}
-where $A$ is a submatrix of $B$. Note that the condition $||A||_* \leq \sqrt{t}||B||_F$ always satisfied if $t$ = rank($B$) since $||A||_* \leq ||B||_*$. Let $E_i$ be i.i.d. from distribution $\Pi$ on $\mc{E}$ which satisfies Assumptions \ref{assume:row_column} and \ref{assume:min_p}, and $\Sigma_R = n^{-1}\sum_{i=1}^{n}\epsilon_i E_i$, where $\{\epsilon_i\}_{i=1}^{n}$ is Rademacher sequence. Then, for all $A\in \mc{C}(t)$
+%where $A$ is a submatrix of $B$. Note that the condition $||A||_* \leq \sqrt{t}||B||_F$ always satisfied if $t$ = rank($B$) since $||A||_* \leq ||B||_*$. 
+Let $E_i$ be i.i.d. from distribution $\Pi$ on $\mc{E}$ which satisfies Assumptions \ref{assume:row_column} and \ref{assume:min_p}, and $\Sigma_R = n^{-1}\sum_{i=1}^{n}\epsilon_i E_i$, where $\{\epsilon_i\}_{i=1}^{n}$ is Rademacher sequence. Then, for all $A\in \mc{C}(t)$
 \begin{align}
-\frac{1}{2}||A||_\Pi^2  - 44 ptm_1m_2(\mathbb{E}[||\Sigma_R||])^2 \leq \frac{1}{n}||\mc{P}_{\Omega}(A)||_F^2
+\frac{1}{2}||A||_{L_2(\Pi)}^2  - 44 ptm_1m_2(\mathbb{E}[||\Sigma_R||])^2 \leq \frac{1}{n}||\mc{P}_{\Omega}(A)||_F^2
 \end{align}
 with probability at least $1-2(m_1+m_2)^{-1}$.
 \end{lemma}
@@ -314,16 +324,17 @@ with probability at least $1-2(m_1+m_2)^{-1}$.
 ||A||_* - ||B||_* \leq ||\mc{P}_A(A-B)||_* - ||\mc{P}_A^\perp(A-B)||_*
 \end{equation}
 \end{lemma}
-\textbf{Proof} By definition $\mc{P}_A^\perp(B)$ for any matrix $B$, $||A + \mc{P}_A^\perp(B-A)||_* = ||A||_* + ||\mc{P}_A^\perp(B-A)||_*$
+\textbf{Proof} The definition on $\mc{P}_A^\perp(B)$ for any matrix $B$ implies $||A + \mc{P}_A^\perp(B-A)||_* = ||A||_* + ||\mc{P}_A^\perp(B-A)||_*$. Then the nuclear norm on $B$
 \begin{align}
 ||B||_* = ||B + A - A||_* &= ||A + \mc{P}^\perp_A(B-A) + \mc{P}_A(B-A)||_*\\
 &\geq ||A + \mc{P}^\perp_A(B-A)||_* + ||\mc{P}_A(B-A)||_*\\
-&= ||A||_* + ||\mc{P}^\perp_A(B-A)||_* + ||\mc{P}_A(B-A)||_*
+&= ||A||_* + ||\mc{P}^\perp_A(B-A)||_* + ||\mc{P}_A(B-A)||_*,
 \end{align}
+where we use the triangular inequality on the projected space.
 
 %$A, B \in \mathbb{R}^{m_1 \times m_2}, ||A + \mc{P}_{A}^{\perp}(B)||_* = ||A||_* + ||\mc{P}_{X}^\perp(B)||_*$
 
-\subsection{Lower Bound on $||N-\hat{N}||_F^2$}
+\subsection{Lower Bound on $||B_0-\hat{B}||_F^2$}
 
 It is crucial to derive a lower bound on $||N-\hat{N}||_F^2$. We can use the same argument used in \cite{lafond2015low} to show the lower bound.
 
