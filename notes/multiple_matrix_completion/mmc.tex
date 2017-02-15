@@ -230,7 +230,7 @@ Let $Z_0 = [A_0, B_0] \in \mathbb{R}^{m_1 \times (m_2+m_3)}$ be the horizontally
 
 Our problem is a special case where we sample $n_M$ samples from leftmost $m_2$ columns and $n_N$ from rightmost $m_3$ columns. More formally, let $\Pi_A$ be a distribution on set $\mc{E}^{A} = \{e_j(m_1)e_k^\top(m_2+m_3), 1\leq j \leq m_1, 1\leq k \leq m_2\}$, and $\Pi_{B}$ a distribution on set $\mc{E}^{B} = \{e_j(m_1)e_k^\top(m_2+m_3), 1\leq j \leq m_1, 1+m_2\leq k \leq m_2+m_3\}$. And define $\Pi_\rho = \rho \Pi^{A} + (1-\rho)\Pi^{B}$ where $0 < \rho < 1/2$. If $\Phi_A$ and $\Phi_B$ satisfy Assumption \ref{assume:min_p} with parameter $p_A$ and $p_B$, Equation \ref{eqn:fro_ineq} implies
 \begin{align}
-||Z_0||_{L_2(\Pi_\rho)}^2 \geq \min(\frac{\rho}{p_Am_1m_2},\frac{1-\rho}{p_Bm_1m_3})||Z_0||_F^2 \geq \frac{\rho}{pm_1(m_2+m_3)},
+||Z_0||_{L_2(\Pi_\rho)}^2 \geq \min(\frac{\rho}{p_Am_1m_2},\frac{1-\rho}{p_Bm_1m_3})||Z_0||_F^2 \geq \frac{\rho}{pm_1(m_2+m_3)} ||Z_0||_F^2,
 \end{align}
 where $p = \min(p_A, p_B)$.
 
@@ -273,9 +273,12 @@ where $n = n_M + n_N$. This implies
 Applying Lemma \ref{lmm:normdiff} and using triangular inequality $||Z_0 - \hat{Z}||_* \leq ||\mc{P}_{Z_0}(Z_0 - \hat{Z})||_* + ||\mc{P}_{Z_0}^\perp(Z_0 - \hat{Z})||_*$, we obtain
 \begin{equation}
 \frac{1}{n}||\mathcal{P}_\Omega(Z_0 - \hat{Z}) ||_F^2 = \frac{1}{n}||\mc{P}_{\Omega_A}(A_0-\hat{A})||_F^2 + \frac{1}{n}||\mc{P}_{\Omega_B}(B_0-\hat{B})||_F^2
-\leq \frac{5}{3}\lambda ||\mc{P}_Z(Z_0-\hat{Z})||_*.
+\leq \frac{5}{3}\lambda ||\mc{P}_{Z_0}(Z_0-\hat{Z})||_*.
 \label{eqn:tri}
 \end{equation}
+
+Since $||\hat{Z} - Z_0||_* \leq \sqrt{72\text{rank}(Z_0)}||\hat{Z} - Z_0||_F$, if $||\hat{Z}-Z_0||_\infty^{-1}(\hat{Z}-Z_0) \in \mc{C}(72\text{rank}(Z_0))$, then Lemma \ref{lmm:constraintset} leads an upper bound on the squared error of entire matrix
+
 
 %Let $\alpha = ||M - \hat{M}||_\infty (\leq 2\gamma)$. If $\alpha^{-1}(M-\hat{M}) \in \mc{C}(t)$, then by Lemma \ref{lmm:constraintset}
 %\begin{equation}
@@ -314,7 +317,7 @@ Applying Lemma \ref{lmm:normdiff} and using triangular inequality $||Z_0 - \hat{
 %where $A$ is a submatrix of $B$. Note that the condition $||A||_* \leq \sqrt{t}||B||_F$ always satisfied if $t$ = rank($B$) since $||A||_* \leq ||B||_*$. 
 Let $E_i$ be i.i.d. from distribution $\Pi$ on $\mc{E}$ which satisfies Assumptions \ref{assume:row_column} and \ref{assume:min_p}, and $\Sigma_R = n^{-1}\sum_{i=1}^{n}\epsilon_i E_i$, where $\{\epsilon_i\}_{i=1}^{n}$ is Rademacher sequence. Then, for all $A\in \mc{C}(t)$
 \begin{align}
-\frac{1}{2}||A||_{L_2(\Pi)}^2  - 44 ptm_1m_2(\mathbb{E}[||\Sigma_R||])^2 \leq \frac{1}{n}||\mc{P}_{\Omega}(A)||_F^2
+\frac{1}{2}||A||_{L_2(\Pi)}^2  - 44 ptm_1m_2(\mathbb{E}||\Sigma_R||)^2 \leq \frac{1}{n}||\mc{P}_{\Omega}(A)||_F^2
 \end{align}
 with probability at least $1-2(m_1+m_2)^{-1}$.
 \end{lemma}
@@ -332,7 +335,24 @@ with probability at least $1-2(m_1+m_2)^{-1}$.
 \end{align}
 where we use the triangular inequality on the projected space.
 
-%$A, B \in \mathbb{R}^{m_1 \times m_2}, ||A + \mc{P}_{A}^{\perp}(B)||_* = ||A||_* + ||\mc{P}_{X}^\perp(B)||_*$
+\begin{lemma}\label{lmm:bregman} If $\lambda > 3||\Sigma||$, then
+$||\mc{P}_{Z_0}^\perp(\hat{Z}-Z_0)||_* \leq 5 ||\mc{P}_{Z_0}(\hat{Z}-Z_0)||_*$
+\end{lemma}
+\textbf{Proof} Let $Q^2(Z) = \frac{1}{n}\sum_{i=1}^{n}(\bar{Z}_i - \langle E_i, Z \rangle)^2$ which is convex in $Z$. From the Bregman divergence between $\hat{Z}$ and $Z_0$ with generating function $Q^2$, the following inequality holds
+\begin{align}
+Q^2(\hat{Z}) - Q^2(Z_0) &\geq - \frac{2}{n}\sum_{i=1}^n(\bar{Z}_i - \langle E_i, Z \rangle)\langle E_i, \hat{Z} - Z_0 \rangle = -2 \langle \Sigma, \hat{Z} - Z_0 \rangle \\
+&\geq -2 ||\Sigma||\,||\hat{Z} - Z_0||_* \\
+&\geq - \frac{2}{3} \lambda ||\hat{Z} - Z_0||_*
+\end{align}
+The definition of estimator $\hat{Z}$ implies
+\begin{align}
+\lambda||\hat{Z}||_* - \lambda||Z_0||_* \leq Q^2(Z_0) - Q^2(\hat{Z}) \leq \frac{2}{3} \lambda ||\hat{Z} - Z_0||_*
+\end{align}
+Using Lemma \ref{lmm:normdiff}, we compute
+\begin{align}
+\frac{2}{3}||\hat{Z} - Z_0||_* \leq ||\mc{P}_{Z_0}(\hat{Z} - Z_0)||_* - ||\mc{P}_{Z_0}^\perp(\hat{Z} - Z_0)||_*,
+\end{align}
+which together with the triangular inequality on $||\hat{Z} - Z_0||_*$ leads to Lemma \ref{lmm:bregman}.
 
 \subsection{Lower Bound on $||B_0-\hat{B}||_F^2$}
 
