@@ -277,13 +277,29 @@ Applying Lemma \ref{lmm:normdiff} and using triangular inequality $||Z_0 - \hat{
 \label{eqn:tri}
 \end{equation}
 
-Since $||\hat{Z} - Z_0||_* \leq \sqrt{72\text{rank}(Z_0)}||\hat{Z} - Z_0||_F$, if $||\hat{Z}-Z_0||_\infty^{-1}(\hat{Z}-Z_0) \in \mc{C}(72\text{rank}(Z_0))$, then Lemma \ref{lmm:constraintset} leads an upper bound on the squared error of entire matrix
-
+Let $\zeta = 3168p\gamma^2\text{rank}(Z_0)m_1(m_2+m_3)\rho^{-1}(\mathbb{E}||\Sigma_R||)^2$. Since $||\hat{Z} - Z_0||_* \leq \sqrt{72\text{rank}(Z_0)}||\hat{Z} - Z_0||_F$, if $||\hat{Z}-Z_0||_\infty^{-1}(\hat{Z}-Z_0) \in \mc{C}(72\text{rank}(Z_0))$, then Lemma \ref{lmm:constraintset} and \ref{lmm:prj_rankbound} leads an upper bound on the squared error of entire matrix
 \begin{align}
-\frac{1}{2}||\bar{Z}-Z_0||_{L_2(\Pi_\rho)}^2 &\leq \frac{5}{3}\lambda\sqrt{2\text{rank}(Z_0)}||\bar{Z} - Z_0||_F + 3168p\gamma^2\text{rank}(Z_0)m_1(m_2+m_3)\rho^{-1}(\mathbb{E}||\Sigma_R||)^2\\
-\frac{\rho}{2pm_1(m_2+m_3)} ||\hat{Z} - Z_0||_F^2 &\leq \frac{5}{3}\lambda\sqrt{2\text{rank}(Z_0)}||\bar{Z} - Z_0||_F + 3168p\gamma^2\text{rank}(Z_0)m_1(m_2+m_3)\rho^{-1}(\mathbb{E}||\Sigma_R||)^2\\
+\frac{1}{2}||\hat{Z}-Z_0||_{L_2(\Pi_\rho)}^2 &\leq \frac{5}{3}\lambda\sqrt{2\text{rank}(Z_0)}||\hat{Z} - Z_0||_F + \zeta \\
+\frac{\rho}{2pm_1(m_2+m_3)} ||\hat{Z} - Z_0||_F^2 &\leq \frac{5}{3}\lambda\sqrt{2\text{rank}(Z_0)}||\hat{Z} - Z_0||_F + \zeta \label{eqn:bound1}
 \end{align}
-
+with probability at least $1-2/(m_1+m_2+m_3)$. By using inequality $ab \leq a^2 + b^2$, the first term on the RHS is bounded
+\begin{align}
+\frac{5}{3}\lambda\sqrt{2\text{rank}(Z_0)}||\hat{Z} - Z_0||_F & \leq \bigg(\frac{5}{3}\lambda\sqrt{\frac{8\text{rank}(Z_0)pm_1(m_2+m_3)}{\rho}}\bigg)^2 
++ \bigg(\sqrt{\frac{\rho}{4pm_1(m_2+m_3)}}||\hat{Z} - Z_0||_F\bigg)^2 \\
+& = \frac{320\lambda^2 \text{rank}(Z_0)pm_1(m_2+m_3)}{9\rho} + \frac{\rho}{4pm_1(m_2+m_3)}||\hat{Z}-Z_0||_F^2.
+\end{align}
+Applying this inequality to Equation \ref{eqn:bound1} yields
+\begin{align}
+\frac{\rho}{4pm_1(m_2+m_3)} ||\hat{Z} - Z_0||_F^2 \leq  36\lambda^2 \text{rank}(Z_0)pm_1(m_2+m_3)\rho^{-1} + \zeta
+\end{align}
+Therefore, there exist numerical constants $c_1$ such that
+\begin{align}
+||\hat{Z} - Z_0||_F^2 \leq  c_1 \text{rank}(Z_0)\bigg(\frac{pm_1(m_2+m_3)}{\rho}\bigg)^2(\lambda^2 + \gamma^2(\mathbb{E}||\Sigma_R||)^2).
+\end{align}
+It is trivial to see that the bound on matrix $A_0$
+\begin{align}
+\frac{||\hat{A}-A_0||_F^2}{m_1m_2} \leq  c_1 \text{rank}(Z_0)\frac{m_1}{m_2}\bigg(\frac{p(m_2+m_3)}{\rho}\bigg)^2(\lambda^2 + \gamma^2(\mathbb{E}||\Sigma_R||)^2).
+\end{align}
 
 %Let $\alpha = ||M - \hat{M}||_\infty (\leq 2\gamma)$. If $\alpha^{-1}(M-\hat{M}) \in \mc{C}(t)$, then by Lemma \ref{lmm:constraintset}
 %\begin{equation}
